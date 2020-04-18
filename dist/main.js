@@ -48146,8 +48146,8 @@ exports.__esModule = true;
 var three_1 = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
 var stage_1 = __webpack_require__(/*! ./stage */ "./src/stage.js");
 var staticImage_1 = __webpack_require__(/*! ./staticImage */ "./src/staticImage.js");
-var player_1 = __webpack_require__(/*! ./player */ "./src/player.js");
-var platform_1 = __webpack_require__(/*! ./platform */ "./src/platform.js");
+//import { Button } from "./button";
+//import { platform } from "os";
 var mouse_1 = __webpack_require__(/*! ./mouse */ "./src/mouse.js");
 var renderer = new three_1.WebGLRenderer();
 //renderer.setSize(window.innerWidth, window.innerHeight);//1:1 scale resolution
@@ -48180,74 +48180,48 @@ stageList["win"].update = function () {
 };
 //backgrounds
 stageList["main"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["main"].sceneList["ui"], 0, 0, "assets/solidBlue.png", new three_1.Vector3(16, 9, 1)));
-stageList["main"].elementsList["background"].push(new staticImage_1.StaticImage(stageList["main"].sceneList["background"], 0, 4.5, "assets/waves1.png", new three_1.Vector3(16, 9, 1)));
-stageList["main"].elementsList["background"].push(new staticImage_1.StaticImage(stageList["main"].sceneList["background"], 0, 4.5, "assets/waves2.png", new three_1.Vector3(16, 9, 1)));
+//stageList["main"].elementsList["background"].push(new StaticImage(stageList["main"].sceneList["background"], 0, 4.5, "assets/waves1.png", new Vector3(16, 9, 1)));
+//stageList["main"].elementsList["background"].push(new StaticImage(stageList["main"].sceneList["background"], 0, 4.5, "assets/waves2.png", new Vector3(16, 9, 1)));
 //stageList["gameOver"].elementsList["ui"].push(new StaticImage(stageList["gameOver"].sceneList["ui"], 0, 0, "assets/winScreen.png", new Vector3(16, 9, 1)));
 stageList["splash"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["splash"].sceneList["ui"], 0, 0, "assets/Magnet_guy.png", new three_1.Vector3(16, 9, 1)));
 stageList["win"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["win"].sceneList["ui"], 0, 0, "assets/win.png", new three_1.Vector3(16, 9, 1)));
-stageList["main"].elementsList["game"].push(new player_1.Player(stageList["main"].sceneList["game"], renderer.capabilities.getMaxAnisotropy()));
+//stageList["main"].elementsList["game"].push(new Player(stageList["main"].sceneList["game"], renderer.capabilities.getMaxAnisotropy()));
 stageList["main"].elementsList["ui"].push(new mouse_1.Mouse(stageList["main"].sceneList["game"], renderer.capabilities.getMaxAnisotropy()));
 //game screen logic
 stageList["main"].update = function () {
     var localStage = stageList["main"];
     //wave logic
-    localStage.elementsList["background"][0].x = Math.sin(ticks / 16) / 4;
-    localStage.elementsList["background"][1].x = -Math.sin(ticks / 16) / 4;
+    //localStage.elementsList["background"][0].x = Math.sin(ticks/16)/4;
+    //localStage.elementsList["background"][1].x = -Math.sin(ticks/16)/4;
     //platform spawning
     if (ticks % 120 == 0) {
-        var spawnLocation = Math.random();
-        if (spawnLocation < .25) {
-            localStage.elementsList["game"].push(new platform_1.Platform(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0, ticks / 120));
-        }
-        else if (spawnLocation >= .25 && spawnLocation < .5) {
-            localStage.elementsList["game"].push(new platform_1.Platform(localStage.sceneList["game"], (Math.random() * 14) + 1, -.05, (Math.random() * .04) - .02, Math.random() * .02, 0, ticks / 120));
-        }
-        else if (spawnLocation >= .5 && spawnLocation < .75) {
-            localStage.elementsList["game"].push(new platform_1.Platform(localStage.sceneList["game"], -8.5, (Math.random() * 7) + 1, Math.random() * .02, (Math.random() * .04) - .02, 0, ticks / 120));
-        }
-        else if (spawnLocation >= .75) {
-            localStage.elementsList["game"].push(new platform_1.Platform(localStage.sceneList["game"], 8.5, (Math.random() * 7) + 1, -Math.random() * .02, (Math.random() * .04) - .02, 0, ticks / 120));
-        }
+        // var spawnLocation = Math.random();
+        // if(spawnLocation < .25)
+        // {
+        //     localStage.elementsList["game"].push(
+        //         new Platform(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0, ticks / 120));
+        // }
     }
     localStage.elementsList["game"].forEach(function (el) {
         if (el.isAlive != undefined && !el.isAlive) {
             localStage.sceneList["game"].remove(el.sprite);
         }
     });
-    var localPlayer = localStage.elementsList["game"].find(function (el) { return el instanceof player_1.Player; });
+    //var localPlayer: Player = localStage.elementsList["game"].find(el => el instanceof Player);
     var localMouse = localStage.elementsList["ui"].find(function (el) { return el instanceof mouse_1.Mouse; }); //I guess this isn't really UI then is it
     // filter out dead entities
-    localStage.elementsList["game"] = localStage.elementsList["game"].filter(function (el) { return el.isAlive || el instanceof player_1.Player || el.isAlive == undefined; });
-    localStage.elementsList["game"].forEach(function (element) {
-        if (element.isAlive != undefined && element.x < localPlayer.x - 16) {
-            element.isAlive = false;
-        }
-    });
+    localStage.elementsList["game"] = localStage.elementsList["game"].filter(function (el) { return el.isAlive /*|| el instanceof Player*/ || el.isAlive == undefined; });
+    // localStage.elementsList["game"].forEach(element => {
+    //     if (element.isAlive != undefined && element.x < localPlayer.x - 16) {
+    //         element.isAlive = false;
+    //     }
+    // });
     localStage.elementsList["game"].forEach(function (el) { el.update(); });
     //localStage.cameraList["game"].position.set(localPlayer ? localPlayer.x : localStage.cameraList["game"].position.x, localStage.cameraList["game"].position.y, localStage.cameraList["game"].position.z);
     //magnet attraction
-    if (localMouse.isClickedDown) {
-        //create a list of platforms already updated from attached platforms here
-        localStage.elementsList["game"].forEach(function (el) {
-            if (el instanceof platform_1.Platform &&
-                el.x - (el.sprite.scale.x / 2) < localMouse.x + (1 / 1) &&
-                el.x + (el.sprite.scale.x / 2) > localMouse.x - (1 / 1) &&
-                el.y - (el.sprite.scale.y / 2) < localMouse.y + (1 / 1) &&
-                el.y + (el.sprite.scale.y / 2) > localMouse.y - (1 / 1)) {
-                el.xVelocity -= Math.sign(el.x - localMouse.x) * .001;
-                el.yVelocity -= Math.sign(el.y - localMouse.y) * .001;
-                //also change attached platform velocities here
-                // el.xVelocity -= Math.abs(el.xVelocity) > .05 && Math.abs(el.xVelocity - ((el.x - localMouse.x) * .01)) > Math.abs(el.xVelocity) ?
-                //      0 : (el.x - localMouse.x) * .001;//magic magnet number
-                // el.yVelocity -= Math.abs(el.yVelocity) > .05 && Math.abs(el.yVelocity - ((el.y - localMouse.y) * .01)) > Math.abs(el.yVelocity) ?
-                //      0 : (el.y - localMouse.y) * .001;
-                el.attachedTo.forEach(function (el2) {
-                    el2.xVelocity = el.xVelocity;
-                    el2.yVelocity = el.yVelocity;
-                });
-            }
-        });
-    }
+    // if(localMouse.isClickedDown)
+    // {
+    // }
     //collision logic
     localStage.elementsList["game"].forEach(function (el) {
         localStage.elementsList["game"].forEach(function (el2) {
@@ -48257,68 +48231,8 @@ stageList["main"].update = function () {
                     // if (el instanceof Player && el.isAlive && el2 instanceof Platform && (el2.type === 2 || el2.type === 3)) {
                     //     el2.isAlive = false;
                     // }
-                    if (el instanceof platform_1.Platform && el2 instanceof platform_1.Platform && el.attachedTo.findIndex(function (x) { return x.id == el2.id; }) == -1 &&
-                        el2.attachedTo.findIndex(function (x) { return x.id == el.id; }) == -1) {
-                        var moveDifference = 0;
-                        if (Math.abs(el.x - el2.x) < Math.abs(el.y - el2.y)) {
-                            moveDifference = el2.x - el.x;
-                            //el.x = el2.x;
-                            el.x += moveDifference;
-                            el.attachedTo.forEach(function (el3) {
-                                el3.x += moveDifference;
-                            });
-                            if (Math.abs(el.y - (el2.y + 1 / 8)) < Math.abs(el.y - (el2.y - 1 / 8))) {
-                                moveDifference = (el2.y + 1 / 8) - el.y;
-                            }
-                            else {
-                                moveDifference = (el2.y - 1 / 8) - el.y;
-                            }
-                            el.y += moveDifference;
-                            el.attachedTo.forEach(function (el3) {
-                                el3.y += moveDifference;
-                            });
-                        }
-                        else {
-                            moveDifference = el2.y - el.y;
-                            el.y = el2.y;
-                            el.attachedTo.forEach(function (el3) {
-                                el3.y += moveDifference;
-                            });
-                            if (Math.abs(el.x - (el2.x + 1 / 8)) < Math.abs(el.x - (el2.x - 1 / 8))) {
-                                moveDifference = (el2.x + 1 / 8) - el.x;
-                            }
-                            else {
-                                moveDifference = (el2.x - 1 / 8) - el.x;
-                            }
-                            el.x += moveDifference;
-                            el.attachedTo.forEach(function (el3) {
-                                el3.x += moveDifference;
-                            });
-                        }
-                        el.attachedTo.push(el2);
-                        el2.attachedTo.push(el);
-                        el.isAttached = true;
-                        el2.isAttached = true;
-                        el.xVelocity = el2.xVelocity;
-                        el.yVelocity = el2.yVelocity;
-                        el.attachedTo.forEach(function (el3) {
-                            el3.xVelocity = el2.xVelocity;
-                            el3.yVelocity = el2.yVelocity;
-                        });
-                        el.attachedTo.forEach(function (el3) {
-                            if (el2.attachedTo.findIndex(function (x) { return x.id == el3.id; }) == -1) {
-                                el2.attachedTo.push(el3);
-                            }
-                        });
-                        el2.attachedTo.forEach(function (el3) {
-                            if (el.attachedTo.findIndex(function (x) { return x.id == el3.id; }) == -1) {
-                                el.attachedTo.push(el3);
-                            }
-                        });
-                        if (el.attachedTo.length > 5 || el2.attachedTo.length > 5) {
-                            currentStage = "win";
-                        }
-                    }
+                    // if (el instanceof Platform && el2 instanceof Platform) {
+                    // }
                 }
             }
         });
@@ -48359,52 +48273,54 @@ window.addEventListener("keydown", function (e) {
         music.play();
     }
     if (currentStage == "main") {
-        var player = stageList["main"].elementsList["game"].find(function (el) { return el instanceof player_1.Player; });
-        if (player.isAlive) {
-            if (e.keyCode === 39 /* right */ || e.keyCode === 68 /* d */) {
-                player.right = true;
-            }
-            if (e.keyCode === 37 /* left */ || e.keyCode === 65 /* a */) {
-                player.left = true;
-            }
-            if (e.keyCode === 38 /* up */ || e.keyCode === 87 /* w */) {
-                player.up = true;
-            }
-            if (e.keyCode === 40 /* down */ || e.keyCode === 83 /* s */) { //check this lol
-                player.down = true;
-            }
-        }
+        //mouse controls planned
+        // const player: Player = stageList["main"].elementsList["game"].find(el => el instanceof Player);
+        // if (player.isAlive) {
+        //     if (e.keyCode === 39 /* right */ || e.keyCode === 68 /* d */) {
+        //         player.right = true;
+        //     }
+        //     if (e.keyCode === 37 /* left */ || e.keyCode === 65 /* a */) {
+        //         player.left = true;
+        //     }
+        //     if (e.keyCode === 38 /* up */ || e.keyCode === 87 /* w */) {
+        //         player.up = true;
+        //     }
+        //     if (e.keyCode === 40 /* down */ || e.keyCode === 83 /* s */) {//check this lol
+        //         player.down = true;
+        //     }
+        // }
     }
 });
 /* movement controls for the player */
 window.addEventListener("keyup", function (e) {
     if (currentStage == "main") {
-        var player = stageList["main"].elementsList["game"].find(function (el) { return el instanceof player_1.Player; });
-        if (player.isAlive) {
-            if (e.keyCode === 39 /* right */ || e.keyCode === 68 /* d */) {
-                player.right = false;
-            }
-            if (e.keyCode === 37 /* left */ || e.keyCode === 65 /* a */) {
-                player.left = false;
-            }
-            if (e.keyCode === 38 /* up */ || e.keyCode === 87 /* w */) {
-                player.up = false;
-            }
-            if (e.keyCode === 40 /* down */ || e.keyCode === 83 /* s */) { //check this lol
-                player.down = false;
-            }
-        }
+        //mouse controls planned
+        // const player = stageList["main"].elementsList["game"].find(el => el instanceof Player);
+        // if (player.isAlive) {
+        //     if (e.keyCode === 39 /* right */ || e.keyCode === 68 /* d */) {
+        //         player.right = false;
+        //     }
+        //     if (e.keyCode === 37 /* left */ || e.keyCode === 65 /* a */) {
+        //         player.left = false;
+        //     }
+        //     if (e.keyCode === 38 /* up */ || e.keyCode === 87 /* w */) {
+        //         player.up = false;
+        //     }
+        //     if (e.keyCode === 40 /* down */ || e.keyCode === 83 /* s */) {//check this lol
+        //         player.down = false;
+        //     }
+        // }
     }
 });
-var respawn = function () {
-    // respawn player to starting position
-    var player = stageList["main"].elementsList["game"].find(function (el) { return el instanceof player_1.Player; });
-    if (player) {
-        player.x = 0;
-        player.y = 0;
-        player.isAlive = true;
-    }
-};
+// var respawn = function () {
+//     // respawn player to starting position
+//     var player: Player = stageList["main"].elementsList["game"].find(el => el instanceof Player);
+//     if (player) {
+//         player.x = 0;
+//         player.y = 0;
+//         player.isAlive = true;
+//     }
+// }
 window.addEventListener("click", function (e) {
     if (currentStage == "splash") {
         currentStage = "main";
@@ -48495,176 +48411,6 @@ var Mouse = /** @class */ (function (_super) {
     return Mouse;
 }(stage_1.Updateable));
 exports.Mouse = Mouse;
-
-
-/***/ }),
-
-/***/ "./src/platform.js":
-/*!*************************!*\
-  !*** ./src/platform.js ***!
-  \*************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-exports.__esModule = true;
-var three_1 = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
-var stage_1 = __webpack_require__(/*! ./stage */ "./src/stage.js");
-var THREE = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js"); //only needed due to three type shenanigans
-var Platform = /** @class */ (function (_super) {
-    __extends(Platform, _super);
-    function Platform(scene, x, y, xVel, yVel, type, id) {
-        var _this = _super.call(this) || this;
-        _this.x = x;
-        _this.y = y;
-        _this.type = type;
-        _this.totalTicks = 0;
-        _this.isAlive = true;
-        _this.isAttached = false;
-        _this.xVelocity = xVel;
-        _this.yVelocity = yVel;
-        var scaleX = 1 / 8;
-        var scaleY = 1 / 8;
-        var scaleZ = 1;
-        //this.rotationRadians = rotationRadians;//not implementing rotation for awhile
-        _this.id = id;
-        _this.attachedTo = [];
-        var spriteMap;
-        switch (type) {
-            case 0: { //basic platform
-                spriteMap = new THREE.TextureLoader().load("assets/raft1.png");
-                //this.lifetimeTicks = 60 * 10;//10 seconds
-                break;
-            }
-        }
-        spriteMap.minFilter = THREE.NearestFilter;
-        spriteMap.magFilter = THREE.NearestFilter;
-        var spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap, color: 0xffffff });
-        _this.sprite = new three_1.Sprite(spriteMaterial);
-        _this.sprite.scale.set(scaleX, scaleY, scaleZ); //guesstemates
-        scene.add(_this.sprite);
-        return _this;
-    }
-    Platform.prototype.render = function () {
-    };
-    Platform.prototype.update = function () {
-        // this.totalTicks++;
-        var _this = this;
-        // if (this.totalTicks >= this.lifetimeTicks) {
-        //     this.isAlive = false;
-        // }
-        this.x += this.xVelocity;
-        this.y += this.yVelocity;
-        this.attachedTo.forEach(function (el) {
-            el.xVelocity = _this.xVelocity;
-            el.yVelocity = _this.yVelocity;
-        });
-        this.sprite.position.set(this.x, this.y, 0);
-    };
-    return Platform;
-}(stage_1.Updateable));
-exports.Platform = Platform;
-
-
-/***/ }),
-
-/***/ "./src/player.js":
-/*!***********************!*\
-  !*** ./src/player.js ***!
-  \***********************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-exports.__esModule = true;
-var three_1 = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
-var stage_1 = __webpack_require__(/*! ./stage */ "./src/stage.js");
-var THREE = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
-var Player = /** @class */ (function (_super) {
-    __extends(Player, _super);
-    function Player(scene, maxAnisotrophy) {
-        var _this = _super.call(this) || this;
-        _this.scene = scene;
-        _this.x = 0;
-        _this.y = 4.5;
-        _this.xVel = 0;
-        _this.yVel = 0;
-        _this.left = false;
-        _this.right = false;
-        _this.up = false;
-        _this.down = false;
-        _this.maxVel = 0.05;
-        _this.health = 100;
-        _this.isAlive = true;
-        _this.maxAnisotrophy = maxAnisotrophy;
-        _this.beemanIdleState = new THREE.TextureLoader().load("assets/swimmer1.png");
-        var spriteMap = _this.beemanIdleState;
-        spriteMap.anisotropy = _this.maxAnisotrophy;
-        var spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap, color: 0xffffff });
-        spriteMaterial.map.minFilter = THREE.LinearFilter;
-        _this.sprite = new three_1.Sprite(spriteMaterial);
-        _this.sprite.scale.set(1 / 8, 1 / 8, 1 / 8);
-        _this.scene.add(_this.sprite);
-        return _this;
-    }
-    Player.prototype.update = function () {
-        if (this.right) {
-            this.xVel = Math.min(this.xVel += 0.01, this.maxVel);
-        }
-        if (this.left) {
-            this.xVel = Math.max(this.xVel -= 0.01, -this.maxVel);
-        }
-        if (this.up) {
-            this.yVel = Math.max(this.yVel += 0.001, this.maxVel); //idk why, but otherwise it's too fast
-        }
-        if (this.down) {
-            this.yVel = Math.max(this.yVel -= 0.01, -this.maxVel);
-        }
-        this.x += !this.isAlive || (this.x < -7.5 && this.xVel < 0) || (this.x > 7.5 && this.xVel > 0) ? 0 : this.xVel;
-        this.y += !this.isAlive || (this.y < .5 && this.yVel < 0) || (this.y > 8.5 && this.yVel > 0) ? 0 : this.yVel;
-        this.xVel *= 0.95;
-        this.yVel *= 0.95;
-        this.sprite.position.set(this.x, this.y, 0);
-        if (this.health <= 0) {
-            this.isAlive = false;
-        }
-        else {
-            this.isAlive = true;
-        }
-    };
-    Player.prototype.render = function () {
-    };
-    return Player;
-}(stage_1.Updateable));
-exports.Player = Player;
 
 
 /***/ }),
