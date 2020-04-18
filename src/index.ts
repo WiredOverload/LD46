@@ -169,47 +169,17 @@ window.addEventListener("keydown", e => {
     if(music.played != null) {
         music.play();
     }
-    if (currentStage == "main") {
-        //mouse controls planned
-        // const player: Player = stageList["main"].elementsList["game"].find(el => el instanceof Player);
-        // if (player.isAlive) {
-        //     if (e.keyCode === 39 /* right */ || e.keyCode === 68 /* d */) {
-        //         player.right = true;
-        //     }
-        //     if (e.keyCode === 37 /* left */ || e.keyCode === 65 /* a */) {
-        //         player.left = true;
-        //     }
-        //     if (e.keyCode === 38 /* up */ || e.keyCode === 87 /* w */) {
-        //         player.up = true;
-        //     }
-        //     if (e.keyCode === 40 /* down */ || e.keyCode === 83 /* s */) {//check this lol
-        //         player.down = true;
-        //     }
-        // }
-    }
+    // if (currentStage == "main") {
+    //     //mouse controls planned
+    // }
 });
 
 /* movement controls for the player */
-window.addEventListener("keyup", e => {
-    if (currentStage == "main") {
-        //mouse controls planned
-        // const player = stageList["main"].elementsList["game"].find(el => el instanceof Player);
-        // if (player.isAlive) {
-        //     if (e.keyCode === 39 /* right */ || e.keyCode === 68 /* d */) {
-        //         player.right = false;
-        //     }
-        //     if (e.keyCode === 37 /* left */ || e.keyCode === 65 /* a */) {
-        //         player.left = false;
-        //     }
-        //     if (e.keyCode === 38 /* up */ || e.keyCode === 87 /* w */) {
-        //         player.up = false;
-        //     }
-        //     if (e.keyCode === 40 /* down */ || e.keyCode === 83 /* s */) {//check this lol
-        //         player.down = false;
-        //     }
-        // }
-    }
-});
+// window.addEventListener("keyup", e => {
+//     if (currentStage == "main") {
+//         //mouse controls planned
+//     }
+// });
 
 // var respawn = function () {
 //     // respawn player to starting position

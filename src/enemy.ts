@@ -32,7 +32,7 @@ export class Enemy extends Updateable {
         var spriteMap: Texture;
         switch (type) {
             case 0: {
-                spriteMap = new THREE.TextureLoader().load("assets/raft1.png");
+                spriteMap = new THREE.TextureLoader().load("assets/Tiny.png");
                 break;
             }
         }

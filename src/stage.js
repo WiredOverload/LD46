@@ -57,7 +57,7 @@ var Stage = /** @class */ (function () {
         this.cameraList["background"].position.set(this.cameraList["game"].position.x, this.cameraList["game"].position.y, this.cameraList["game"].position.z);
     };
     Stage.prototype.update = function () {
-        //this should be left empty for each instance to define themselves
+        //this should be left empty for each instance to define themselves?
     };
     return Stage;
 }());

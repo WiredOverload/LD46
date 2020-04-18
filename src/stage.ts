@@ -79,6 +79,6 @@ export class Stage {
     }
 
     update() {
-        //this should be left empty for each instance to define themselves
+        //this should be left empty for each instance to define themselves?
     }
 }
