@@ -1,18 +1,21 @@
 /**
- * TODO For Library:
- * Buttons and other interactable elements need more work in stage
- * individual stage update methods defined here?
- * 
+ * Fix moving in straight lines
+ * Stop stacking placements
+ * Add light obstacles
+ * Add enemies
+ * Add ally spawns
+ * Add neutral non-moving state
+ * Add placement indicator
+ * Add adjacency bonuses
  */
 
-import { Scene, PerspectiveCamera, WebGLRenderer, MinEquation, Vector3, Sprite, Texture, SpriteMaterial } from "three";
-import { Stage } from "./stage";
+import { Scene, PerspectiveCamera, WebGLRenderer, MinEquation, Vector3, Sprite, Texture, SpriteMaterial, Vector2 } from "three";
+import { Stage, Updateable } from "./stage";
 import { StaticImage } from "./staticImage";
-//import { Player } from "./player";
 import THREE = require("three");
-//import { Button } from "./button";
 import { Mouse } from "./mouse";
 import { Enemy } from "./enemy";
+import { Structure } from "./structure";
 
 var renderer: WebGLRenderer = new WebGLRenderer();
 //renderer.setSize(window.innerWidth, window.innerHeight);//1:1 scale resolution
@@ -34,7 +37,9 @@ var music = new Audio('assets/SFX/OceanSong.wav');
 music.loop = true;
 //var shootClip = new Audio('assets/SFX/bee_buzz_edit.wav');
 //shootClip.volume = 0.8;
-var ticks:number = 0;
+//var ticks:number = 0;
+var selectedUnit:any = null;//can't actually use updateable
+var stragglerX:number = -4;
 
 stageList["main"] = new Stage();
 stageList["splash"] = new Stage();
@@ -50,20 +55,25 @@ stageList["win"].update = function () {
 }
 
 //backgrounds
-stageList["main"].elementsList["ui"].push(new StaticImage(stageList["main"].sceneList["ui"], 0, 0, "assets/forestFloor.png", new Vector3(16, 9, 1)));
-//stageList["main"].elementsList["background"].push(new StaticImage(stageList["main"].sceneList["background"], 0, 4.5, "assets/waves1.png", new Vector3(16, 9, 1)));
-//stageList["main"].elementsList["background"].push(new StaticImage(stageList["main"].sceneList["background"], 0, 4.5, "assets/waves2.png", new Vector3(16, 9, 1)));
-//stageList["gameOver"].elementsList["ui"].push(new StaticImage(stageList["gameOver"].sceneList["ui"], 0, 0, "assets/winScreen.png", new Vector3(16, 9, 1)));
+for(var i = 0; i < 50; i++) {//kinda lazy
+    stageList["main"].elementsList["background"].push(new StaticImage(stageList["main"].sceneList["background"], i * 16, 0, "assets/forestFloor.png", new Vector3(16, 9, 1)));
+}
+
+//stageList["gameOver"].elementsList["ui"].push(new StaticImage(stageList["gameOver"].sceneList["ui"], 0, 0, "assets/GenericLoseScreen.png", new Vector3(16, 9, 1)));
 stageList["splash"].elementsList["ui"].push(new StaticImage(stageList["splash"].sceneList["ui"], 0, 0, "assets/Magnet_guy.png", new Vector3(16, 9, 1)));
 stageList["win"].elementsList["ui"].push(new StaticImage(stageList["win"].sceneList["ui"], 0, 0, "assets/win.png", new Vector3(16, 9, 1)));
+stageList["main"].elementsList["ui"].push(new Mouse(stageList["main"].sceneList["ui"]));
 
-
-//stageList["main"].elementsList["game"].push(new Player(stageList["main"].sceneList["game"], renderer.capabilities.getMaxAnisotropy()));
-stageList["main"].elementsList["ui"].push(new Mouse(stageList["main"].sceneList["game"]));
+//initial colony placement
+for(var i = 0; i < 9; i++) {
+    stageList["main"].elementsList["game"].push(new Structure(stageList["main"].sceneList["game"], -1/4 + ((i % 3) * 1/4), 4.25 + (Math.floor(i / 3) * 1/4), i % 2));
+}
 
 //game screen logic
 stageList["main"].update = function () {//actual splash screen update logic here
     var localStage: Stage = stageList["main"];
+
+    
 
     //wave logic
     //localStage.elementsList["background"][0].x = Math.sin(ticks/16)/4;
@@ -73,22 +83,12 @@ stageList["main"].update = function () {//actual splash screen update logic here
     if(false)//ticks % 120 == 0)
     {
         var spawnLocation = Math.random();
-        if(spawnLocation < .25)
+        if(spawnLocation < .5)
         {
             localStage.elementsList["game"].push(
                 new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
         }
-        else if(spawnLocation >= .25 && spawnLocation < .5)
-        {
-            localStage.elementsList["game"].push(
-                new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
-        }
-        else if(spawnLocation >= .5 && spawnLocation < .75)
-        {
-            localStage.elementsList["game"].push(
-                new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
-        }
-        else if(spawnLocation >= .75)
+        else if(spawnLocation >= .5)
         {
             localStage.elementsList["game"].push(
                 new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
@@ -123,6 +123,7 @@ stageList["main"].update = function () {//actual splash screen update logic here
     // }
 
     //collision logic
+    var localMinX:number = 1000000;
     localStage.elementsList["game"].forEach(el => {
         localStage.elementsList["game"].forEach(el2 => {
             if (el !== el2) { // only check for collision between two different objects
@@ -137,13 +138,21 @@ stageList["main"].update = function () {//actual splash screen update logic here
                 }
             }
         });
+        if(!(el instanceof Enemy) && el.x < localMinX){
+            localMinX = el.x
+        }
     });
+
+    if(localMinX > stragglerX) {
+        stragglerX = localMinX;
+    }
+    localStage.cameraList["game"].position.setX(stragglerX + 4);
 }
 
 //main update
 var interval = setInterval(update, 1000 / 60);//60 ticks per second
 function update() {
-    ticks++;
+    //ticks++;
     stageList[currentStage].baseUpdate();
     stageList[currentStage].update();
 }
@@ -212,13 +221,33 @@ window.addEventListener("click", e => {
 window.addEventListener("mousemove", e => { 
     var mouse:Mouse = stageList["main"].elementsList["ui"].find(el => el instanceof Mouse);
     mouse.x = ((e.clientX / window.innerWidth) * 16) - 8;
-    mouse.y = 9 - ((e.clientY / window.innerHeight) * 9);
+    mouse.y = 4.5 - ((e.clientY / window.innerHeight) * 9);
 });
 
 window.addEventListener("mouseup", e => { 
     var mouse:Mouse = stageList["main"].elementsList["ui"].find(el => el instanceof Mouse);
     mouse.isClickedUp = true;
     mouse.isClickedDown = false;
+    mouse.y += 4.5;//dumb hack to not have to reposition game elements
+    mouse.x += stragglerX + 4;
+
+    if(currentStage == "main"){
+        if(selectedUnit == null){
+            stageList["main"].elementsList["game"].forEach(el => {
+                if(collision(el, mouse)){
+                    selectedUnit = el;
+                }
+            });
+        }
+        else
+        {
+            selectedUnit.target = new Vector2(Math.round(mouse.x * 4) / 4, Math.round(mouse.y * 4) / 4);
+            selectedUnit = null;
+        }
+    }
+    
+    mouse.y -= 4.5;//dumb hack to not have to reposition game elements
+    mouse.x -= stragglerX + 4;
 });
 
 window.addEventListener("mousedown", e => { 

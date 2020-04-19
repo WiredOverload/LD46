@@ -42,7 +42,7 @@ export class Stage {
         this.cameraList["ui"].position.set(0, 0, 25);
         this.cameraList["ui"].lookAt(0, 0, 0);
 
-        this.cameraList["background"] = new OrthographicCamera(this.width/-2, this.width/2, this.height, 0, -1000, 1000);//make sure this is always the same as the gameCamera
+        this.cameraList["background"] = new OrthographicCamera(this.width/-2, this.width/2, this.height/2, this.height/-2, -1000, 1000);//make sure this is always the same as the gameCamera
         this.cameraList["background"].position.set(0, 0, 25);
         this.cameraList["background"].lookAt(0, 0, 0);
 
@@ -54,24 +54,25 @@ export class Stage {
 
     render(renderer:WebGLRenderer) {
         renderer.autoClear = true;
-        renderer.render( this.sceneList["ui"], this.cameraList["ui"] );
-        renderer.autoClear = false;
         renderer.render( this.sceneList["background"], this.cameraList["background"] );
+        renderer.autoClear = false;
+        
         renderer.render( this.sceneList["game"], this.cameraList["game"] );
+        renderer.render( this.sceneList["ui"], this.cameraList["ui"] );
+
     }
 
     baseUpdate() {
+        //mouse
+        this.elementsList["ui"].forEach(element => {
+            element.update();
+        });
+
         this.elementsList["game"].forEach(element => {
             element.update();
         });
 
-        //waves
         this.elementsList["background"].forEach(element => {
-            element.update();
-        });
-
-        //magnet
-        this.elementsList["ui"].forEach(element => {
             element.update();
         });
 

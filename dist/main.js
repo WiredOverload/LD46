@@ -48209,18 +48209,22 @@ exports.Enemy = Enemy;
 "use strict";
 
 /**
- * TODO For Library:
- * Buttons and other interactable elements need more work in stage
- * individual stage update methods defined here?
- *
+ * Fix moving in straight lines
+ * Stop stacking placements
+ * Add light obstacles
+ * Add enemies
+ * Add ally spawns
+ * Add neutral non-moving state
+ * Add placement indicator
+ * Add adjacency bonuses
  */
 exports.__esModule = true;
 var three_1 = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
 var stage_1 = __webpack_require__(/*! ./stage */ "./src/stage.js");
 var staticImage_1 = __webpack_require__(/*! ./staticImage */ "./src/staticImage.js");
-//import { Button } from "./button";
 var mouse_1 = __webpack_require__(/*! ./mouse */ "./src/mouse.js");
 var enemy_1 = __webpack_require__(/*! ./enemy */ "./src/enemy.js");
+var structure_1 = __webpack_require__(/*! ./structure */ "./src/structure.js");
 var renderer = new three_1.WebGLRenderer();
 //renderer.setSize(window.innerWidth, window.innerHeight);//1:1 scale resolution
 if (window.innerWidth / 16 > window.innerHeight / 9) {
@@ -48239,7 +48243,9 @@ var music = new Audio('assets/SFX/OceanSong.wav');
 music.loop = true;
 //var shootClip = new Audio('assets/SFX/bee_buzz_edit.wav');
 //shootClip.volume = 0.8;
-var ticks = 0;
+//var ticks:number = 0;
+var selectedUnit = null; //can't actually use updateable
+var stragglerX = -4;
 stageList["main"] = new stage_1.Stage();
 stageList["splash"] = new stage_1.Stage();
 stageList["win"] = new stage_1.Stage();
@@ -48251,14 +48257,17 @@ stageList["win"].update = function () {
     stageList["win"].elementsList["game"].forEach(function (el) { el.update(); });
 };
 //backgrounds
-stageList["main"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["main"].sceneList["ui"], 0, 0, "assets/forestFloor.png", new three_1.Vector3(16, 9, 1)));
-//stageList["main"].elementsList["background"].push(new StaticImage(stageList["main"].sceneList["background"], 0, 4.5, "assets/waves1.png", new Vector3(16, 9, 1)));
-//stageList["main"].elementsList["background"].push(new StaticImage(stageList["main"].sceneList["background"], 0, 4.5, "assets/waves2.png", new Vector3(16, 9, 1)));
-//stageList["gameOver"].elementsList["ui"].push(new StaticImage(stageList["gameOver"].sceneList["ui"], 0, 0, "assets/winScreen.png", new Vector3(16, 9, 1)));
+for (var i = 0; i < 50; i++) { //kinda lazy
+    stageList["main"].elementsList["background"].push(new staticImage_1.StaticImage(stageList["main"].sceneList["background"], i * 16, 0, "assets/forestFloor.png", new three_1.Vector3(16, 9, 1)));
+}
+//stageList["gameOver"].elementsList["ui"].push(new StaticImage(stageList["gameOver"].sceneList["ui"], 0, 0, "assets/GenericLoseScreen.png", new Vector3(16, 9, 1)));
 stageList["splash"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["splash"].sceneList["ui"], 0, 0, "assets/Magnet_guy.png", new three_1.Vector3(16, 9, 1)));
 stageList["win"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["win"].sceneList["ui"], 0, 0, "assets/win.png", new three_1.Vector3(16, 9, 1)));
-//stageList["main"].elementsList["game"].push(new Player(stageList["main"].sceneList["game"], renderer.capabilities.getMaxAnisotropy()));
-stageList["main"].elementsList["ui"].push(new mouse_1.Mouse(stageList["main"].sceneList["game"]));
+stageList["main"].elementsList["ui"].push(new mouse_1.Mouse(stageList["main"].sceneList["ui"]));
+//initial colony placement
+for (var i = 0; i < 9; i++) {
+    stageList["main"].elementsList["game"].push(new structure_1.Structure(stageList["main"].sceneList["game"], -1 / 4 + ((i % 3) * 1 / 4), 4.25 + (Math.floor(i / 3) * 1 / 4), i % 2));
+}
 //game screen logic
 stageList["main"].update = function () {
     var localStage = stageList["main"];
@@ -48289,6 +48298,7 @@ stageList["main"].update = function () {
     // {
     // }
     //collision logic
+    var localMinX = 1000000;
     localStage.elementsList["game"].forEach(function (el) {
         localStage.elementsList["game"].forEach(function (el2) {
             if (el !== el2) { // only check for collision between two different objects
@@ -48302,12 +48312,19 @@ stageList["main"].update = function () {
                 }
             }
         });
+        if (!(el instanceof enemy_1.Enemy) && el.x < localMinX) {
+            localMinX = el.x;
+        }
     });
+    if (localMinX > stragglerX) {
+        stragglerX = localMinX;
+    }
+    localStage.cameraList["game"].position.setX(stragglerX + 4);
 };
 //main update
 var interval = setInterval(update, 1000 / 60); //60 ticks per second
 function update() {
-    ticks++;
+    //ticks++;
     stageList[currentStage].baseUpdate();
     stageList[currentStage].update();
 }
@@ -48365,12 +48382,29 @@ window.addEventListener("click", function (e) {
 window.addEventListener("mousemove", function (e) {
     var mouse = stageList["main"].elementsList["ui"].find(function (el) { return el instanceof mouse_1.Mouse; });
     mouse.x = ((e.clientX / window.innerWidth) * 16) - 8;
-    mouse.y = 9 - ((e.clientY / window.innerHeight) * 9);
+    mouse.y = 4.5 - ((e.clientY / window.innerHeight) * 9);
 });
 window.addEventListener("mouseup", function (e) {
     var mouse = stageList["main"].elementsList["ui"].find(function (el) { return el instanceof mouse_1.Mouse; });
     mouse.isClickedUp = true;
     mouse.isClickedDown = false;
+    mouse.y += 4.5; //dumb hack to not have to reposition game elements
+    mouse.x += stragglerX + 4;
+    if (currentStage == "main") {
+        if (selectedUnit == null) {
+            stageList["main"].elementsList["game"].forEach(function (el) {
+                if (collision(el, mouse)) {
+                    selectedUnit = el;
+                }
+            });
+        }
+        else {
+            selectedUnit.target = new three_1.Vector2(Math.round(mouse.x * 4) / 4, Math.round(mouse.y * 4) / 4);
+            selectedUnit = null;
+        }
+    }
+    mouse.y -= 4.5; //dumb hack to not have to reposition game elements
+    mouse.x -= stragglerX + 4;
 });
 window.addEventListener("mousedown", function (e) {
     var mouse = stageList["main"].elementsList["ui"].find(function (el) { return el instanceof mouse_1.Mouse; });
@@ -48413,7 +48447,7 @@ var Mouse = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         _this.x = 0;
         _this.y = 5;
-        _this.spriteMap = new three_1.TextureLoader().load("assets/sparkle3.png");
+        _this.spriteMap = new three_1.TextureLoader().load("assets/sparkle4.png");
         _this.spriteMap.wrapS = _this.spriteMap.wrapT = three_1.RepeatWrapping;
         _this.spriteMap.repeat.set(1 / 8, 1);
         _this.animationDelay = 4;
@@ -48447,10 +48481,10 @@ var Mouse = /** @class */ (function (_super) {
     };
     Mouse.prototype.update = function () {
         this.tick++;
-        this.sprite.position.set(this.x, this.y, 0);
+        this.sprite.position.set(this.x, this.y, 0.1);
         if (this.tick % this.animationDelay == 0) {
             this.animationFrame++;
-            if (this.animationFrame > 5) {
+            if (this.animationFrame > 7) {
                 this.animationFrame = 0;
             }
         }
@@ -48500,7 +48534,7 @@ var Stage = /** @class */ (function () {
         this.cameraList["ui"] = new three_1.OrthographicCamera(this.width / -2, this.width / 2, this.height / 2, this.height / -2, -1000, 1000);
         this.cameraList["ui"].position.set(0, 0, 25);
         this.cameraList["ui"].lookAt(0, 0, 0);
-        this.cameraList["background"] = new three_1.OrthographicCamera(this.width / -2, this.width / 2, this.height, 0, -1000, 1000); //make sure this is always the same as the gameCamera
+        this.cameraList["background"] = new three_1.OrthographicCamera(this.width / -2, this.width / 2, this.height / 2, this.height / -2, -1000, 1000); //make sure this is always the same as the gameCamera
         this.cameraList["background"].position.set(0, 0, 25);
         this.cameraList["background"].lookAt(0, 0, 0);
         this.elementsList = {}; //this seems like a hack to initialize
@@ -48510,21 +48544,20 @@ var Stage = /** @class */ (function () {
     }
     Stage.prototype.render = function (renderer) {
         renderer.autoClear = true;
-        renderer.render(this.sceneList["ui"], this.cameraList["ui"]);
-        renderer.autoClear = false;
         renderer.render(this.sceneList["background"], this.cameraList["background"]);
+        renderer.autoClear = false;
         renderer.render(this.sceneList["game"], this.cameraList["game"]);
+        renderer.render(this.sceneList["ui"], this.cameraList["ui"]);
     };
     Stage.prototype.baseUpdate = function () {
+        //mouse
+        this.elementsList["ui"].forEach(function (element) {
+            element.update();
+        });
         this.elementsList["game"].forEach(function (element) {
             element.update();
         });
-        //waves
         this.elementsList["background"].forEach(function (element) {
-            element.update();
-        });
-        //magnet
-        this.elementsList["ui"].forEach(function (element) {
             element.update();
         });
         this.cameraList["background"].position.set(this.cameraList["game"].position.x, this.cameraList["game"].position.y, this.cameraList["game"].position.z);
@@ -48590,6 +48623,115 @@ var StaticImage = /** @class */ (function (_super) {
     return StaticImage;
 }(stage_1.Updateable));
 exports.StaticImage = StaticImage;
+
+
+/***/ }),
+
+/***/ "./src/structure.js":
+/*!**************************!*\
+  !*** ./src/structure.js ***!
+  \**************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+exports.__esModule = true;
+var three_1 = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
+var stage_1 = __webpack_require__(/*! ./stage */ "./src/stage.js");
+var THREE = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js"); //only needed due to three type shenanigans
+var Structure = /** @class */ (function (_super) {
+    __extends(Structure, _super);
+    function Structure(scene, x, y, type /*, id: number*/) {
+        var _this = _super.call(this) || this;
+        _this.x = x;
+        _this.y = y;
+        _this.type = type;
+        _this.health = 50;
+        _this.isAlive = true;
+        _this.velocity = new three_1.Vector2();
+        var scaleX = 1 / 4;
+        var scaleY = 1 / 4;
+        var scaleZ = 1;
+        _this.angle = 0;
+        _this.target = new three_1.Vector2(0, 0);
+        //this.rotationRadians = rotationRadians;//not implementing rotation for awhile
+        //this.id = id;
+        _this.animationDelay = 8;
+        _this.animationFrame = 0;
+        _this.tick = 0;
+        _this.spawnTicks = 0;
+        switch (type) {
+            case 0: {
+                _this.spriteMap = new THREE.TextureLoader().load("assets/moss1Rotated.png");
+                _this.speed = .01;
+                _this.spawnCost = 5 * 60;
+                break;
+            }
+            case 1: {
+                _this.spriteMap = new THREE.TextureLoader().load("assets/moss2Rotated.png");
+                _this.speed = .015;
+                _this.spawnCost = 7 * 60;
+                break;
+            }
+        }
+        _this.spriteMap.minFilter = three_1.LinearFilter;
+        _this.spriteMap.magFilter = three_1.NearestFilter;
+        _this.spriteMap.wrapS = _this.spriteMap.wrapT = three_1.RepeatWrapping;
+        _this.spriteMap.repeat.set(1 / 16, 1);
+        var spriteMaterial = new THREE.SpriteMaterial({ map: _this.spriteMap, color: 0xffffff });
+        _this.sprite = new three_1.Sprite(spriteMaterial);
+        _this.sprite.scale.set(scaleX, scaleY, scaleZ); //guesstemates
+        scene.add(_this.sprite);
+        return _this;
+    }
+    Structure.prototype.render = function () {
+    };
+    Structure.prototype.update = function () {
+        if (!(this.target.x == 0 && this.target.y == 0) &&
+            this.x != this.target.x && this.y != this.target.y) {
+            if (this.velocity.x != 0 || this.velocity.y != 0) {
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                if (Math.abs(this.target.x - this.x) < .1 && Math.abs(this.target.y - this.y) < .1) {
+                    this.x = this.target.x;
+                    this.y = this.target.y;
+                    this.velocity.x = 0;
+                    this.velocity.y = 0;
+                }
+            }
+            else {
+                this.angle = Math.atan((this.target.y - this.y) / (this.target.x - this.x));
+                this.velocity.x = Math.cos(this.angle) * this.speed;
+                this.velocity.y = Math.sin(this.angle) * this.speed;
+            }
+        }
+        this.sprite.position.set(this.x, this.y, 0);
+        this.tick++;
+        if (this.tick % this.animationDelay == 0) {
+            this.animationFrame++;
+            if (this.animationFrame > 15) {
+                this.animationFrame = 0;
+            }
+        }
+        this.spriteMap.offset.x = this.animationFrame / 16;
+    };
+    return Structure;
+}(stage_1.Updateable));
+exports.Structure = Structure;
 
 
 /***/ })

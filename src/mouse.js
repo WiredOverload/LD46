@@ -22,7 +22,7 @@ var Mouse = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         _this.x = 0;
         _this.y = 5;
-        _this.spriteMap = new three_1.TextureLoader().load("assets/sparkle3.png");
+        _this.spriteMap = new three_1.TextureLoader().load("assets/sparkle4.png");
         _this.spriteMap.wrapS = _this.spriteMap.wrapT = three_1.RepeatWrapping;
         _this.spriteMap.repeat.set(1 / 8, 1);
         _this.animationDelay = 4;
@@ -56,10 +56,10 @@ var Mouse = /** @class */ (function (_super) {
     };
     Mouse.prototype.update = function () {
         this.tick++;
-        this.sprite.position.set(this.x, this.y, 0);
+        this.sprite.position.set(this.x, this.y, 0.1);
         if (this.tick % this.animationDelay == 0) {
             this.animationFrame++;
-            if (this.animationFrame > 5) {
+            if (this.animationFrame > 7) {
                 this.animationFrame = 0;
             }
         }

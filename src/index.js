@@ -1,17 +1,21 @@
 "use strict";
 /**
- * TODO For Library:
- * Buttons and other interactable elements need more work in stage
- * individual stage update methods defined here?
- *
+ * Fix moving in straight lines
+ * Stop stacking placements
+ * Add light obstacles
+ * Add enemies
+ * Add ally spawns
+ * Add neutral non-moving state
+ * Add placement indicator
+ * Add adjacency bonuses
  */
 exports.__esModule = true;
 var three_1 = require("three");
 var stage_1 = require("./stage");
 var staticImage_1 = require("./staticImage");
-//import { Button } from "./button";
 var mouse_1 = require("./mouse");
 var enemy_1 = require("./enemy");
+var structure_1 = require("./structure");
 var renderer = new three_1.WebGLRenderer();
 //renderer.setSize(window.innerWidth, window.innerHeight);//1:1 scale resolution
 if (window.innerWidth / 16 > window.innerHeight / 9) {
@@ -30,7 +34,9 @@ var music = new Audio('assets/SFX/OceanSong.wav');
 music.loop = true;
 //var shootClip = new Audio('assets/SFX/bee_buzz_edit.wav');
 //shootClip.volume = 0.8;
-var ticks = 0;
+//var ticks:number = 0;
+var selectedUnit = null; //can't actually use updateable
+var stragglerX = -4;
 stageList["main"] = new stage_1.Stage();
 stageList["splash"] = new stage_1.Stage();
 stageList["win"] = new stage_1.Stage();
@@ -42,14 +48,17 @@ stageList["win"].update = function () {
     stageList["win"].elementsList["game"].forEach(function (el) { el.update(); });
 };
 //backgrounds
-stageList["main"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["main"].sceneList["ui"], 0, 0, "assets/forestFloor.png", new three_1.Vector3(16, 9, 1)));
-//stageList["main"].elementsList["background"].push(new StaticImage(stageList["main"].sceneList["background"], 0, 4.5, "assets/waves1.png", new Vector3(16, 9, 1)));
-//stageList["main"].elementsList["background"].push(new StaticImage(stageList["main"].sceneList["background"], 0, 4.5, "assets/waves2.png", new Vector3(16, 9, 1)));
-//stageList["gameOver"].elementsList["ui"].push(new StaticImage(stageList["gameOver"].sceneList["ui"], 0, 0, "assets/winScreen.png", new Vector3(16, 9, 1)));
+for (var i = 0; i < 50; i++) { //kinda lazy
+    stageList["main"].elementsList["background"].push(new staticImage_1.StaticImage(stageList["main"].sceneList["background"], i * 16, 0, "assets/forestFloor.png", new three_1.Vector3(16, 9, 1)));
+}
+//stageList["gameOver"].elementsList["ui"].push(new StaticImage(stageList["gameOver"].sceneList["ui"], 0, 0, "assets/GenericLoseScreen.png", new Vector3(16, 9, 1)));
 stageList["splash"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["splash"].sceneList["ui"], 0, 0, "assets/Magnet_guy.png", new three_1.Vector3(16, 9, 1)));
 stageList["win"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["win"].sceneList["ui"], 0, 0, "assets/win.png", new three_1.Vector3(16, 9, 1)));
-//stageList["main"].elementsList["game"].push(new Player(stageList["main"].sceneList["game"], renderer.capabilities.getMaxAnisotropy()));
-stageList["main"].elementsList["ui"].push(new mouse_1.Mouse(stageList["main"].sceneList["game"]));
+stageList["main"].elementsList["ui"].push(new mouse_1.Mouse(stageList["main"].sceneList["ui"]));
+//initial colony placement
+for (var i = 0; i < 9; i++) {
+    stageList["main"].elementsList["game"].push(new structure_1.Structure(stageList["main"].sceneList["game"], -1 / 4 + ((i % 3) * 1 / 4), 4.25 + (Math.floor(i / 3) * 1 / 4), i % 2));
+}
 //game screen logic
 stageList["main"].update = function () {
     var localStage = stageList["main"];
@@ -60,16 +69,10 @@ stageList["main"].update = function () {
     if (false) //ticks % 120 == 0)
      {
         var spawnLocation = Math.random();
-        if (spawnLocation < .25) {
+        if (spawnLocation < .5) {
             localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
         }
-        else if (spawnLocation >= .25 && spawnLocation < .5) {
-            localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
-        }
-        else if (spawnLocation >= .5 && spawnLocation < .75) {
-            localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
-        }
-        else if (spawnLocation >= .75) {
+        else if (spawnLocation >= .5) {
             localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
         }
     }
@@ -94,6 +97,7 @@ stageList["main"].update = function () {
     // {
     // }
     //collision logic
+    var localMinX = 1000000;
     localStage.elementsList["game"].forEach(function (el) {
         localStage.elementsList["game"].forEach(function (el2) {
             if (el !== el2) { // only check for collision between two different objects
@@ -107,12 +111,19 @@ stageList["main"].update = function () {
                 }
             }
         });
+        if (!(el instanceof enemy_1.Enemy) && el.x < localMinX) {
+            localMinX = el.x;
+        }
     });
+    if (localMinX > stragglerX) {
+        stragglerX = localMinX;
+    }
+    localStage.cameraList["game"].position.setX(stragglerX + 4);
 };
 //main update
 var interval = setInterval(update, 1000 / 60); //60 ticks per second
 function update() {
-    ticks++;
+    //ticks++;
     stageList[currentStage].baseUpdate();
     stageList[currentStage].update();
 }
@@ -170,12 +181,29 @@ window.addEventListener("click", function (e) {
 window.addEventListener("mousemove", function (e) {
     var mouse = stageList["main"].elementsList["ui"].find(function (el) { return el instanceof mouse_1.Mouse; });
     mouse.x = ((e.clientX / window.innerWidth) * 16) - 8;
-    mouse.y = 9 - ((e.clientY / window.innerHeight) * 9);
+    mouse.y = 4.5 - ((e.clientY / window.innerHeight) * 9);
 });
 window.addEventListener("mouseup", function (e) {
     var mouse = stageList["main"].elementsList["ui"].find(function (el) { return el instanceof mouse_1.Mouse; });
     mouse.isClickedUp = true;
     mouse.isClickedDown = false;
+    mouse.y += 4.5; //dumb hack to not have to reposition game elements
+    mouse.x += stragglerX + 4;
+    if (currentStage == "main") {
+        if (selectedUnit == null) {
+            stageList["main"].elementsList["game"].forEach(function (el) {
+                if (collision(el, mouse)) {
+                    selectedUnit = el;
+                }
+            });
+        }
+        else {
+            selectedUnit.target = new three_1.Vector2(Math.round(mouse.x * 4) / 4, Math.round(mouse.y * 4) / 4);
+            selectedUnit = null;
+        }
+    }
+    mouse.y -= 4.5; //dumb hack to not have to reposition game elements
+    mouse.x -= stragglerX + 4;
 });
 window.addEventListener("mousedown", function (e) {
     var mouse = stageList["main"].elementsList["ui"].find(function (el) { return el instanceof mouse_1.Mouse; });
