@@ -27,7 +27,7 @@ export class Structure extends Updateable {
         this.x = x;
         this.y = y;
         this.type = type;
-        this.health = 50;
+        this.health = 90;
         this.isAlive = true; 
         this.velocity = new Vector2();
         var scaleX = 1/4;
@@ -74,7 +74,7 @@ export class Structure extends Updateable {
     update() {
 
         if(!(this.target.x == 0 && this.target.y == 0) &&
-            this.x != this.target.x && this.y != this.target.y){
+            !(this.x == this.target.x && this.y == this.target.y)){
             if(this.velocity.x != 0 || this.velocity.y != 0){
                 this.x += this.velocity.x;
                 this.y += this.velocity.y;
@@ -88,8 +88,8 @@ export class Structure extends Updateable {
             else
             {
                 this.angle = Math.atan((this.target.y - this.y)/(this.target.x - this.x));
-                this.velocity.x = Math.cos(this.angle) * this.speed;
-                this.velocity.y = Math.sin(this.angle) * this.speed;
+                this.velocity.x = Math.cos(this.angle) * this.speed * Math.sign(this.target.x - this.x);
+                this.velocity.y = Math.sin(this.angle) * this.speed * Math.sign(this.target.x - this.x);
             }
         }
         

@@ -48192,22 +48192,24 @@ var Enemy = /** @class */ (function (_super) {
     Enemy.prototype.render = function () {
     };
     Enemy.prototype.update = function () {
-        if (!(this.target.x == 0 && this.target.y == 0) &&
-            this.x != this.target.x && this.y != this.target.y) {
-            if (this.velocity.x != 0 || this.velocity.y != 0) {
-                this.x += this.velocity.x;
-                this.y += this.velocity.y;
-                if (Math.abs(this.target.x - this.x) < .1 && Math.abs(this.target.y - this.y) < .1) {
-                    this.x = this.target.x;
-                    this.y = this.target.y;
-                    this.velocity.x = 0;
-                    this.velocity.y = 0;
+        if (this.target) {
+            if (!(this.target.x == 0 && this.target.y == 0) &&
+                this.x != this.target.x && this.y != this.target.y) {
+                if (this.velocity.x != 0 || this.velocity.y != 0) {
+                    this.x += this.velocity.x;
+                    this.y += this.velocity.y;
+                    if (Math.abs(this.target.x - this.x) < .1 && Math.abs(this.target.y - this.y) < .1) {
+                        this.x = this.target.x;
+                        this.y = this.target.y;
+                        this.velocity.x = 0;
+                        this.velocity.y = 0;
+                    }
                 }
-            }
-            else {
-                this.angle = Math.atan((this.target.y - this.y) / (this.target.x - this.x));
-                this.velocity.x = Math.cos(this.angle) * this.speed;
-                this.velocity.y = Math.sin(this.angle) * this.speed;
+                else {
+                    this.angle = Math.atan((this.target.y - this.y) / (this.target.x - this.x));
+                    this.velocity.x = Math.cos(this.angle) * this.speed * Math.sign(this.target.x - this.x);
+                    this.velocity.y = Math.sin(this.angle) * this.speed * Math.sign(this.target.x - this.x);
+                }
             }
         }
         this.sprite.position.set(this.x, this.y, 0);
@@ -48238,7 +48240,6 @@ exports.Enemy = Enemy;
 
 /**
  * Fix moving in straight lines
- * Stop stacking placements
  * Add light obstacles
  * Add enemies
  * Add ally spawns
@@ -48254,6 +48255,7 @@ var stage_1 = __webpack_require__(/*! ./stage */ "./src/stage.js");
 var staticImage_1 = __webpack_require__(/*! ./staticImage */ "./src/staticImage.js");
 var mouse_1 = __webpack_require__(/*! ./mouse */ "./src/mouse.js");
 var enemy_1 = __webpack_require__(/*! ./enemy */ "./src/enemy.js");
+var light_1 = __webpack_require__(/*! ./light */ "./src/light.js");
 var structure_1 = __webpack_require__(/*! ./structure */ "./src/structure.js");
 var renderer = new three_1.WebGLRenderer();
 //renderer.setSize(window.innerWidth, window.innerHeight);//1:1 scale resolution
@@ -48291,25 +48293,41 @@ for (var i = 0; i < 50; i++) { //kinda lazy
     stageList["main"].elementsList["background"].push(new staticImage_1.StaticImage(stageList["main"].sceneList["background"], i * 16, 0, "assets/forestFloor.png", new three_1.Vector3(16, 9, 1)));
 }
 //stageList["gameOver"].elementsList["ui"].push(new StaticImage(stageList["gameOver"].sceneList["ui"], 0, 0, "assets/GenericLoseScreen.png", new Vector3(16, 9, 1)));
-stageList["splash"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["splash"].sceneList["ui"], 0, 0, "assets/Magnet_guy.png", new three_1.Vector3(16, 9, 1)));
+stageList["splash"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["splash"].sceneList["ui"], 0, 0, "assets/BbtL_Splash_Screen.png", new three_1.Vector3(16, 9, 1)));
 stageList["win"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["win"].sceneList["ui"], 0, 0, "assets/win.png", new three_1.Vector3(16, 9, 1)));
 stageList["main"].elementsList["ui"].push(new mouse_1.Mouse(stageList["main"].sceneList["ui"]));
 //initial colony placement
 for (var i = 0; i < 9; i++) {
-    stageList["main"].elementsList["game"].push(new structure_1.Structure(stageList["main"].sceneList["game"], -1 / 4 + ((i % 3) * 1 / 4), 4.25 + (Math.floor(i / 3) * 1 / 4), i % 2));
+    stageList["main"].elementsList["game"].push(new structure_1.Structure(stageList["main"].sceneList["game"], 8 + ((i % 3) * 1 / 4), 4.25 + (Math.floor(i / 3) * 1 / 4), i % 2));
 }
 //game screen logic
 stageList["main"].update = function () {
     var localStage = stageList["main"];
     //enemy spawning
-    if (ticks % 120 == 0) {
-        var spawnLocation = Math.random();
-        if (spawnLocation < .5) {
-            localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
-        }
-        else if (spawnLocation >= .5) {
-            localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, -.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
-        }
+    // if(ticks % 120 == 0)
+    // {
+    //     var spawnLocation = Math.random();
+    //     if(spawnLocation < .5)
+    //     {
+    //         localStage.elementsList["game"].push(
+    //             new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+    //     }
+    //     else if(spawnLocation >= .5)
+    //     {
+    //         localStage.elementsList["game"].push(
+    //             new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, -.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+    //     }
+    // }
+    //light spawning
+    if (ticks % 480 == 0) {
+        var spawnX = Math.random();
+        var spawnY = Math.random();
+        localStage.elementsList["game"].push(new light_1.LightBeam(localStage.sceneList["game"], (Math.round(((spawnX * 16) + (stragglerX + 4)) * 4) / 4) + (1 / 8), (Math.round((spawnY * 9) * 4) / 4) + (1 / 8), 0, 0, 0));
+    }
+    else if ((ticks + 240) % 480 == 0) {
+        var spawnX = Math.random();
+        var spawnY = Math.random();
+        localStage.elementsList["game"].push(new light_1.LightBeam(localStage.sceneList["game"], (Math.round((((spawnX * 8) - 4) + (stragglerX + 4)) * 4) / 4) + (1 / 8), (Math.round(spawnY * 9 * 4) / 4) + (1 / 8), 0, 0, 0));
     }
     localStage.elementsList["game"].forEach(function (el) {
         if (el.isAlive != undefined && !el.isAlive) {
@@ -48317,7 +48335,7 @@ stageList["main"].update = function () {
         }
     });
     //var localPlayer: Player = localStage.elementsList["game"].find(el => el instanceof Player);
-    var localMouse = localStage.elementsList["ui"].find(function (el) { return el instanceof mouse_1.Mouse; }); //I guess this isn't really UI then is it
+    var localMouse = localStage.elementsList["ui"].find(function (el) { return el instanceof mouse_1.Mouse; });
     // filter out dead entities
     localStage.elementsList["game"] = localStage.elementsList["game"].filter(function (el) { return el.isAlive || el.isAlive == undefined; });
     // localStage.elementsList["game"].forEach(element => {
@@ -48334,15 +48352,24 @@ stageList["main"].update = function () {
             if (el !== el2) { // only check for collision between two different objects
                 if (collision(el, el2)) {
                     // if player collides with an enemy projectile, take damage   
-                    // if (el instanceof Player && el.isAlive && el2 instanceof Platform && (el2.type === 2 || el2.type === 3)) {
-                    //     el2.isAlive = false;
-                    // }
-                    // if (el instanceof Platform && el2 instanceof Platform) {
-                    // }
+                    if (el instanceof structure_1.Structure && el.isAlive && el2 instanceof light_1.LightBeam && el2.tick > 180) {
+                        //el2.isAlive = false;
+                        el.health--;
+                        if (el.health < 1) {
+                            el.isAlive = false;
+                        }
+                    }
+                    if (el instanceof structure_1.Structure && el.isAlive && el2 instanceof enemy_1.Enemy) {
+                        el2.isAlive = false;
+                        el.health -= 20;
+                        if (el.health < 1) {
+                            el.isAlive = false;
+                        }
+                    }
                 }
             }
         });
-        if (!(el instanceof enemy_1.Enemy) && el.x < localMinX) {
+        if (!(el instanceof enemy_1.Enemy) && !(el instanceof light_1.LightBeam) && el.x < localMinX) {
             localMinX = el.x;
         }
     });
@@ -48423,14 +48450,23 @@ window.addEventListener("mouseup", function (e) {
     if (currentStage == "main") {
         if (selectedUnit == null) {
             stageList["main"].elementsList["game"].forEach(function (el) {
-                if (collision(el, mouse)) {
+                if (!(el instanceof enemy_1.Enemy) && !(el instanceof light_1.LightBeam) && collision(el, mouse)) {
                     selectedUnit = el;
                 }
             });
         }
         else {
-            selectedUnit.target = new three_1.Vector2(Math.round(mouse.x * 4) / 4, Math.round(mouse.y * 4) / 4);
-            selectedUnit = null;
+            var alreadyPlacement = false;
+            stageList["main"].elementsList["game"].forEach(function (el) {
+                if (!(el instanceof enemy_1.Enemy) && !(el instanceof light_1.LightBeam) && collision(el, mouse)) {
+                    alreadyPlacement = true;
+                }
+            });
+            if (!alreadyPlacement) {
+                selectedUnit.target = new three_1.Vector2(Math.round(mouse.x * 4) / 4, Math.round(mouse.y * 4) / 4);
+                selectedUnit.velocity = new three_1.Vector2(0, 0);
+                selectedUnit = null;
+            }
         }
     }
     mouse.y -= 4.5; //dumb hack to not have to reposition game elements
@@ -48441,6 +48477,112 @@ window.addEventListener("mousedown", function (e) {
     mouse.isClickedUp = false;
     mouse.isClickedDown = true;
 });
+
+
+/***/ }),
+
+/***/ "./src/light.js":
+/*!**********************!*\
+  !*** ./src/light.js ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+exports.__esModule = true;
+var three_1 = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
+var stage_1 = __webpack_require__(/*! ./stage */ "./src/stage.js");
+var THREE = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js"); //only needed due to three type shenanigans
+var LightBeam = /** @class */ (function (_super) {
+    __extends(LightBeam, _super);
+    function LightBeam(scene, x, y, xVel, yVel, type /*, id: number*/) {
+        var _this = _super.call(this) || this;
+        _this.x = x;
+        _this.y = y;
+        _this.type = type;
+        _this.health = 50;
+        _this.isAlive = true;
+        _this.velocity = new three_1.Vector2(0, 0);
+        var scaleX = 1;
+        var scaleY = 1;
+        var scaleZ = 1;
+        //this.rotationRadians = rotationRadians;//not implementing rotation for awhile
+        //this.id = id;
+        //this.animationDelay = 8;
+        //this.animationFrame = 0;
+        _this.tick = 0;
+        _this.angle = 0;
+        switch (type) {
+            case 0: {
+                _this.spriteMap = new THREE.TextureLoader().load("assets/lightBeam.png");
+                _this.speed = .02;
+                break;
+            }
+        }
+        _this.spriteMap.minFilter = three_1.LinearFilter;
+        _this.spriteMap.magFilter = three_1.NearestFilter;
+        //this.spriteMap.wrapS = this.spriteMap.wrapT = RepeatWrapping;
+        //this.spriteMap.repeat.set(1/8, 1);
+        _this.spriteMaterial = new THREE.SpriteMaterial({ map: _this.spriteMap, color: 0xffffff });
+        _this.spriteMaterial.opacity = 0;
+        _this.sprite = new three_1.Sprite(_this.spriteMaterial);
+        _this.sprite.scale.set(scaleX, scaleY, scaleZ); //guesstemates
+        scene.add(_this.sprite);
+        return _this;
+    }
+    LightBeam.prototype.render = function () {
+    };
+    LightBeam.prototype.update = function () {
+        if (this.target) {
+            if (!(this.target.x == 0 && this.target.y == 0) &&
+                this.x != this.target.x && this.y != this.target.y) {
+                if (this.velocity.x != 0 || this.velocity.y != 0) {
+                    this.x += this.velocity.x;
+                    this.y += this.velocity.y;
+                    if (Math.abs(this.target.x - this.x) < .1 && Math.abs(this.target.y - this.y) < .1) {
+                        this.x = this.target.x;
+                        this.y = this.target.y;
+                        this.velocity.x = 0;
+                        this.velocity.y = 0;
+                    }
+                }
+                else {
+                    this.angle = Math.atan((this.target.y - this.y) / (this.target.x - this.x));
+                    this.velocity.x = Math.cos(this.angle) * this.speed;
+                    this.velocity.y = Math.sin(this.angle) * this.speed;
+                }
+            }
+        }
+        this.sprite.position.set(this.x, this.y, 0);
+        this.tick++;
+        if (this.tick < 241) {
+            this.spriteMaterial.opacity = this.tick / 240;
+        }
+        // if(this.tick % this.animationDelay == 0) {
+        //     this.animationFrame++;
+        //     if(this.animationFrame > 7) {
+        //         this.animationFrame = 0;
+        //     }
+        // }
+        // this.spriteMap.offset.x = this.animationFrame / 8;
+    };
+    return LightBeam;
+}(stage_1.Updateable));
+exports.LightBeam = LightBeam;
 
 
 /***/ }),
@@ -48690,7 +48832,7 @@ var Structure = /** @class */ (function (_super) {
         _this.x = x;
         _this.y = y;
         _this.type = type;
-        _this.health = 50;
+        _this.health = 90;
         _this.isAlive = true;
         _this.velocity = new three_1.Vector2();
         var scaleX = 1 / 4;
@@ -48732,7 +48874,7 @@ var Structure = /** @class */ (function (_super) {
     };
     Structure.prototype.update = function () {
         if (!(this.target.x == 0 && this.target.y == 0) &&
-            this.x != this.target.x && this.y != this.target.y) {
+            !(this.x == this.target.x && this.y == this.target.y)) {
             if (this.velocity.x != 0 || this.velocity.y != 0) {
                 this.x += this.velocity.x;
                 this.y += this.velocity.y;
@@ -48745,8 +48887,8 @@ var Structure = /** @class */ (function (_super) {
             }
             else {
                 this.angle = Math.atan((this.target.y - this.y) / (this.target.x - this.x));
-                this.velocity.x = Math.cos(this.angle) * this.speed;
-                this.velocity.y = Math.sin(this.angle) * this.speed;
+                this.velocity.x = Math.cos(this.angle) * this.speed * Math.sign(this.target.x - this.x);
+                this.velocity.y = Math.sin(this.angle) * this.speed * Math.sign(this.target.x - this.x);
             }
         }
         this.sprite.position.set(this.x, this.y, 0);

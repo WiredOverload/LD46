@@ -1,6 +1,5 @@
 /**
  * Fix moving in straight lines
- * Stop stacking placements
  * Add light obstacles
  * Add enemies
  * Add ally spawns
@@ -17,6 +16,7 @@ import { StaticImage } from "./staticImage";
 import THREE = require("three");
 import { Mouse } from "./mouse";
 import { Enemy } from "./enemy";
+import { LightBeam } from "./light";
 import { Structure } from "./structure";
 
 var renderer: WebGLRenderer = new WebGLRenderer();
@@ -62,13 +62,13 @@ for(var i = 0; i < 50; i++) {//kinda lazy
 }
 
 //stageList["gameOver"].elementsList["ui"].push(new StaticImage(stageList["gameOver"].sceneList["ui"], 0, 0, "assets/GenericLoseScreen.png", new Vector3(16, 9, 1)));
-stageList["splash"].elementsList["ui"].push(new StaticImage(stageList["splash"].sceneList["ui"], 0, 0, "assets/Magnet_guy.png", new Vector3(16, 9, 1)));
+stageList["splash"].elementsList["ui"].push(new StaticImage(stageList["splash"].sceneList["ui"], 0, 0, "assets/BbtL_Splash_Screen.png", new Vector3(16, 9, 1)));
 stageList["win"].elementsList["ui"].push(new StaticImage(stageList["win"].sceneList["ui"], 0, 0, "assets/win.png", new Vector3(16, 9, 1)));
 stageList["main"].elementsList["ui"].push(new Mouse(stageList["main"].sceneList["ui"]));
 
 //initial colony placement
 for(var i = 0; i < 9; i++) {
-    stageList["main"].elementsList["game"].push(new Structure(stageList["main"].sceneList["game"], -1/4 + ((i % 3) * 1/4), 4.25 + (Math.floor(i / 3) * 1/4), i % 2));
+    stageList["main"].elementsList["game"].push(new Structure(stageList["main"].sceneList["game"], 8 + ((i % 3) * 1/4), 4.25 + (Math.floor(i / 3) * 1/4), i % 2));
 }
 
 //game screen logic
@@ -76,19 +76,35 @@ stageList["main"].update = function () {//actual splash screen update logic here
     var localStage: Stage = stageList["main"];
 
     //enemy spawning
-    if(ticks % 120 == 0)
+    // if(ticks % 120 == 0)
+    // {
+    //     var spawnLocation = Math.random();
+    //     if(spawnLocation < .5)
+    //     {
+    //         localStage.elementsList["game"].push(
+    //             new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+    //     }
+    //     else if(spawnLocation >= .5)
+    //     {
+    //         localStage.elementsList["game"].push(
+    //             new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, -.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+    //     }
+    // }
+
+    //light spawning
+    if(ticks % 480 == 0)
     {
-        var spawnLocation = Math.random();
-        if(spawnLocation < .5)
-        {
-            localStage.elementsList["game"].push(
-                new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
-        }
-        else if(spawnLocation >= .5)
-        {
-            localStage.elementsList["game"].push(
-                new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, -.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
-        }
+        var spawnX:number = Math.random();
+        var spawnY:number = Math.random();
+        localStage.elementsList["game"].push(
+            new LightBeam(localStage.sceneList["game"], (Math.round(((spawnX * 16) + (stragglerX + 4)) * 4) / 4) + (1/8), (Math.round((spawnY * 9) * 4) / 4) + (1/8), 0, 0, 0));
+    }
+    else if((ticks + 240) % 480 == 0)
+    {
+        var spawnX:number = Math.random();
+        var spawnY:number = Math.random();
+        localStage.elementsList["game"].push(
+            new LightBeam(localStage.sceneList["game"], (Math.round((((spawnX * 8) - 4) + (stragglerX + 4)) * 4) / 4) + (1/8), (Math.round(spawnY * 9 * 4) / 4) + (1/8), 0, 0, 0));
     }
 
     localStage.elementsList["game"].forEach(el => {
@@ -98,7 +114,7 @@ stageList["main"].update = function () {//actual splash screen update logic here
     });
 
     //var localPlayer: Player = localStage.elementsList["game"].find(el => el instanceof Player);
-    var localMouse:Mouse = localStage.elementsList["ui"].find(el => el instanceof Mouse);//I guess this isn't really UI then is it
+    var localMouse:Mouse = localStage.elementsList["ui"].find(el => el instanceof Mouse);
     
     // filter out dead entities
     localStage.elementsList["game"] = localStage.elementsList["game"].filter(el => el.isAlive || el.isAlive == undefined);
@@ -119,16 +135,25 @@ stageList["main"].update = function () {//actual splash screen update logic here
             if (el !== el2) { // only check for collision between two different objects
                 if (collision(el, el2)) {
                     // if player collides with an enemy projectile, take damage   
-                    // if (el instanceof Player && el.isAlive && el2 instanceof Platform && (el2.type === 2 || el2.type === 3)) {
-                    //     el2.isAlive = false;
-                    // }
-                    // if (el instanceof Platform && el2 instanceof Platform) {
-
-                    // }
+                    if (el instanceof Structure && el.isAlive && el2 instanceof LightBeam && el2.tick > 180) {
+                        //el2.isAlive = false;
+                        el.health--;
+                        if(el.health < 1) {
+                            el.isAlive = false;
+                        }
+                    }
+                    if (el instanceof Structure && el.isAlive && el2 instanceof Enemy) {
+                        el2.isAlive = false;
+                        el.health -= 20;
+                        if(el.health < 1) {
+                            el.isAlive = false;
+                        }
+                    }
                 }
             }
         });
-        if(!(el instanceof Enemy) && el.x < localMinX){
+
+        if(!(el instanceof Enemy) && !(el instanceof LightBeam) && el.x < localMinX){
             localMinX = el.x
         }
     });
@@ -224,15 +249,25 @@ window.addEventListener("mouseup", e => {
     if(currentStage == "main"){
         if(selectedUnit == null){
             stageList["main"].elementsList["game"].forEach(el => {
-                if(collision(el, mouse)){
+                if(!(el instanceof Enemy) && !(el instanceof LightBeam) && collision(el, mouse)){
                     selectedUnit = el;
                 }
             });
         }
         else
         {
-            selectedUnit.target = new Vector2(Math.round(mouse.x * 4) / 4, Math.round(mouse.y * 4) / 4);
-            selectedUnit = null;
+            var alreadyPlacement = false;
+            stageList["main"].elementsList["game"].forEach(el => {
+                if(!(el instanceof Enemy) && !(el instanceof LightBeam) && collision(el, mouse)){
+                    alreadyPlacement = true;
+                }
+            });
+
+            if(!alreadyPlacement) {
+                selectedUnit.target = new Vector2(Math.round(mouse.x * 4) / 4, Math.round(mouse.y * 4) / 4);
+                selectedUnit.velocity = new Vector2(0, 0);
+                selectedUnit = null;
+            }
         }
     }
     
