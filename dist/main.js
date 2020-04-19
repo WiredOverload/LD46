@@ -48162,8 +48162,7 @@ var Enemy = /** @class */ (function (_super) {
         _this.type = type;
         _this.health = 50;
         _this.isAlive = true;
-        _this.xVelocity = xVel;
-        _this.yVelocity = yVel;
+        _this.velocity = new three_1.Vector2(0, 0);
         var scaleX = 1 / 8;
         var scaleY = 1 / 8;
         var scaleZ = 1;
@@ -48172,9 +48171,11 @@ var Enemy = /** @class */ (function (_super) {
         _this.animationDelay = 8;
         _this.animationFrame = 0;
         _this.tick = 0;
+        _this.angle = 0;
         switch (type) {
             case 0: {
                 _this.spriteMap = new THREE.TextureLoader().load("assets/Beetle.png");
+                _this.speed = .02;
                 break;
             }
         }
@@ -48191,8 +48192,24 @@ var Enemy = /** @class */ (function (_super) {
     Enemy.prototype.render = function () {
     };
     Enemy.prototype.update = function () {
-        this.x += this.xVelocity;
-        this.y += this.yVelocity;
+        if (!(this.target.x == 0 && this.target.y == 0) &&
+            this.x != this.target.x && this.y != this.target.y) {
+            if (this.velocity.x != 0 || this.velocity.y != 0) {
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                if (Math.abs(this.target.x - this.x) < .1 && Math.abs(this.target.y - this.y) < .1) {
+                    this.x = this.target.x;
+                    this.y = this.target.y;
+                    this.velocity.x = 0;
+                    this.velocity.y = 0;
+                }
+            }
+            else {
+                this.angle = Math.atan((this.target.y - this.y) / (this.target.x - this.x));
+                this.velocity.x = Math.cos(this.angle) * this.speed;
+                this.velocity.y = Math.sin(this.angle) * this.speed;
+            }
+        }
         this.sprite.position.set(this.x, this.y, 0);
         this.tick++;
         if (this.tick % this.animationDelay == 0) {
@@ -48256,7 +48273,7 @@ var music = new Audio('assets/SFX/OceanSong.wav');
 music.loop = true;
 //var shootClip = new Audio('assets/SFX/bee_buzz_edit.wav');
 //shootClip.volume = 0.8;
-//var ticks:number = 0;
+var ticks = 0;
 var selectedUnit = null; //can't actually use updateable
 var stragglerX = -4;
 stageList["main"] = new stage_1.Stage();
@@ -48284,12 +48301,16 @@ for (var i = 0; i < 9; i++) {
 //game screen logic
 stageList["main"].update = function () {
     var localStage = stageList["main"];
-    //wave logic
-    //localStage.elementsList["background"][0].x = Math.sin(ticks/16)/4;
-    //localStage.elementsList["background"][1].x = -Math.sin(ticks/16)/4;
-    //platform spawning
-    if (false) //ticks % 120 == 0)
-     { var spawnLocation; }
+    //enemy spawning
+    if (ticks % 120 == 0) {
+        var spawnLocation = Math.random();
+        if (spawnLocation < .5) {
+            localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+        }
+        else if (spawnLocation >= .5) {
+            localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, -.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+        }
+    }
     localStage.elementsList["game"].forEach(function (el) {
         if (el.isAlive != undefined && !el.isAlive) {
             localStage.sceneList["game"].remove(el.sprite);
@@ -48298,7 +48319,7 @@ stageList["main"].update = function () {
     //var localPlayer: Player = localStage.elementsList["game"].find(el => el instanceof Player);
     var localMouse = localStage.elementsList["ui"].find(function (el) { return el instanceof mouse_1.Mouse; }); //I guess this isn't really UI then is it
     // filter out dead entities
-    localStage.elementsList["game"] = localStage.elementsList["game"].filter(function (el) { return el.isAlive /*|| el instanceof Player*/ || el.isAlive == undefined; });
+    localStage.elementsList["game"] = localStage.elementsList["game"].filter(function (el) { return el.isAlive || el.isAlive == undefined; });
     // localStage.elementsList["game"].forEach(element => {
     //     if (element.isAlive != undefined && element.x < localPlayer.x - 16) {
     //         element.isAlive = false;
@@ -48306,10 +48327,6 @@ stageList["main"].update = function () {
     // });
     localStage.elementsList["game"].forEach(function (el) { el.update(); });
     //localStage.cameraList["game"].position.set(localPlayer ? localPlayer.x : localStage.cameraList["game"].position.x, localStage.cameraList["game"].position.y, localStage.cameraList["game"].position.z);
-    //magnet attraction
-    // if(localMouse.isClickedDown)
-    // {
-    // }
     //collision logic
     var localMinX = 1000000;
     localStage.elementsList["game"].forEach(function (el) {
@@ -48337,7 +48354,7 @@ stageList["main"].update = function () {
 //main update
 var interval = setInterval(update, 1000 / 60); //60 ticks per second
 function update() {
-    //ticks++;
+    ticks++;
     stageList[currentStage].baseUpdate();
     stageList[currentStage].update();
 }

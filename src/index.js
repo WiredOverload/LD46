@@ -36,7 +36,7 @@ var music = new Audio('assets/SFX/OceanSong.wav');
 music.loop = true;
 //var shootClip = new Audio('assets/SFX/bee_buzz_edit.wav');
 //shootClip.volume = 0.8;
-//var ticks:number = 0;
+var ticks = 0;
 var selectedUnit = null; //can't actually use updateable
 var stragglerX = -4;
 stageList["main"] = new stage_1.Stage();
@@ -64,18 +64,14 @@ for (var i = 0; i < 9; i++) {
 //game screen logic
 stageList["main"].update = function () {
     var localStage = stageList["main"];
-    //wave logic
-    //localStage.elementsList["background"][0].x = Math.sin(ticks/16)/4;
-    //localStage.elementsList["background"][1].x = -Math.sin(ticks/16)/4;
-    //platform spawning
-    if (false) //ticks % 120 == 0)
-     {
+    //enemy spawning
+    if (ticks % 120 == 0) {
         var spawnLocation = Math.random();
         if (spawnLocation < .5) {
             localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
         }
         else if (spawnLocation >= .5) {
-            localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+            localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, -.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
         }
     }
     localStage.elementsList["game"].forEach(function (el) {
@@ -86,7 +82,7 @@ stageList["main"].update = function () {
     //var localPlayer: Player = localStage.elementsList["game"].find(el => el instanceof Player);
     var localMouse = localStage.elementsList["ui"].find(function (el) { return el instanceof mouse_1.Mouse; }); //I guess this isn't really UI then is it
     // filter out dead entities
-    localStage.elementsList["game"] = localStage.elementsList["game"].filter(function (el) { return el.isAlive /*|| el instanceof Player*/ || el.isAlive == undefined; });
+    localStage.elementsList["game"] = localStage.elementsList["game"].filter(function (el) { return el.isAlive || el.isAlive == undefined; });
     // localStage.elementsList["game"].forEach(element => {
     //     if (element.isAlive != undefined && element.x < localPlayer.x - 16) {
     //         element.isAlive = false;
@@ -94,10 +90,6 @@ stageList["main"].update = function () {
     // });
     localStage.elementsList["game"].forEach(function (el) { el.update(); });
     //localStage.cameraList["game"].position.set(localPlayer ? localPlayer.x : localStage.cameraList["game"].position.x, localStage.cameraList["game"].position.y, localStage.cameraList["game"].position.z);
-    //magnet attraction
-    // if(localMouse.isClickedDown)
-    // {
-    // }
     //collision logic
     var localMinX = 1000000;
     localStage.elementsList["game"].forEach(function (el) {
@@ -125,7 +117,7 @@ stageList["main"].update = function () {
 //main update
 var interval = setInterval(update, 1000 / 60); //60 ticks per second
 function update() {
-    //ticks++;
+    ticks++;
     stageList[currentStage].baseUpdate();
     stageList[currentStage].update();
 }
