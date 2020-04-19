@@ -9,13 +9,10 @@ import { Scene, PerspectiveCamera, WebGLRenderer, MinEquation, Vector3, Sprite, 
 import { Stage } from "./stage";
 import { StaticImage } from "./staticImage";
 //import { Player } from "./player";
-//import { Platform } from "./platform";
-// import { Enemy } from "./enemy";
-// import { Platform } from "./platform";
 import THREE = require("three");
 //import { Button } from "./button";
-//import { platform } from "os";
 import { Mouse } from "./mouse";
+import { Enemy } from "./enemy";
 
 var renderer: WebGLRenderer = new WebGLRenderer();
 //renderer.setSize(window.innerWidth, window.innerHeight);//1:1 scale resolution
@@ -53,7 +50,7 @@ stageList["win"].update = function () {
 }
 
 //backgrounds
-stageList["main"].elementsList["ui"].push(new StaticImage(stageList["main"].sceneList["ui"], 0, 0, "assets/solidBlue.png", new Vector3(16, 9, 1)));
+stageList["main"].elementsList["ui"].push(new StaticImage(stageList["main"].sceneList["ui"], 0, 0, "assets/forestFloor.png", new Vector3(16, 9, 1)));
 //stageList["main"].elementsList["background"].push(new StaticImage(stageList["main"].sceneList["background"], 0, 4.5, "assets/waves1.png", new Vector3(16, 9, 1)));
 //stageList["main"].elementsList["background"].push(new StaticImage(stageList["main"].sceneList["background"], 0, 4.5, "assets/waves2.png", new Vector3(16, 9, 1)));
 //stageList["gameOver"].elementsList["ui"].push(new StaticImage(stageList["gameOver"].sceneList["ui"], 0, 0, "assets/winScreen.png", new Vector3(16, 9, 1)));
@@ -62,7 +59,7 @@ stageList["win"].elementsList["ui"].push(new StaticImage(stageList["win"].sceneL
 
 
 //stageList["main"].elementsList["game"].push(new Player(stageList["main"].sceneList["game"], renderer.capabilities.getMaxAnisotropy()));
-stageList["main"].elementsList["ui"].push(new Mouse(stageList["main"].sceneList["game"], renderer.capabilities.getMaxAnisotropy()));
+stageList["main"].elementsList["ui"].push(new Mouse(stageList["main"].sceneList["game"]));
 
 //game screen logic
 stageList["main"].update = function () {//actual splash screen update logic here
@@ -73,14 +70,29 @@ stageList["main"].update = function () {//actual splash screen update logic here
     //localStage.elementsList["background"][1].x = -Math.sin(ticks/16)/4;
 
     //platform spawning
-    if(ticks % 120 == 0)
+    if(false)//ticks % 120 == 0)
     {
-        // var spawnLocation = Math.random();
-        // if(spawnLocation < .25)
-        // {
-        //     localStage.elementsList["game"].push(
-        //         new Platform(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0, ticks / 120));
-        // }
+        var spawnLocation = Math.random();
+        if(spawnLocation < .25)
+        {
+            localStage.elementsList["game"].push(
+                new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+        }
+        else if(spawnLocation >= .25 && spawnLocation < .5)
+        {
+            localStage.elementsList["game"].push(
+                new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+        }
+        else if(spawnLocation >= .5 && spawnLocation < .75)
+        {
+            localStage.elementsList["game"].push(
+                new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+        }
+        else if(spawnLocation >= .75)
+        {
+            localStage.elementsList["game"].push(
+                new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+        }
     }
 
     localStage.elementsList["game"].forEach(el => {

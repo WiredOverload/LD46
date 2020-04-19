@@ -1,4 +1,4 @@
-import { Sprite, Scene, TextureLoader, SpriteMaterial, Vector3, Texture, WebGLRenderer} from "three";
+import { Sprite, Scene, TextureLoader, SpriteMaterial, Vector3, Texture, WebGLRenderer, RepeatWrapping, NearestFilter, LinearFilter} from "three";
 import { Updateable } from "./stage";
 var THREE = require('three');//only needed due to three type shenanigans
 
@@ -9,45 +9,67 @@ export class Mouse extends Updateable{
     y:number;
     isClickedDown:boolean;
     isClickedUp:boolean;
+    spriteMap:Texture;
+    animationDelay:number;
+    animationFrame:number;
+    tick;
 
-    constructor(scene:Scene, maxAnisotropy:number) {
+    constructor(scene:Scene) {
         super();//needed?
         this.x = 0;
         this.y = 5;
-        var spriteMap:Texture = new THREE.TextureLoader().load("assets/magnet.png");
-        var field:Texture = new THREE.TextureLoader().load("assets/magneticField.png");
-        field.anisotropy = maxAnisotropy;
-        spriteMap.anisotropy = maxAnisotropy;//renderer.capabilities.getMaxAnisotropy()
-        // spriteMap.minFilter = THREE.NearestFilter;
-        // spriteMap.magFilter = THREE.NearestFilter;
-        var spriteMaterial:SpriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
-        var spriteFieldMaterial:SpriteMaterial = new THREE.SpriteMaterial( { map: field, color: 0xffffff } );
-        //spriteMaterial.map.minFilter = THREE.LinearFilter;
+        this.spriteMap = new TextureLoader().load("assets/sparkle3.png");
+        this.spriteMap.wrapS = this.spriteMap.wrapT = RepeatWrapping;
+        this.spriteMap.repeat.set(1/8, 1);
+        this.animationDelay = 4;
+        this.animationFrame = 0;
+        this.tick = 0;
+        
+        this.spriteMap.anisotropy = 0;//maxAnisotropy;//renderer.capabilities.getMaxAnisotropy()
+        this.spriteMap.minFilter = LinearFilter;
+        this.spriteMap.magFilter = NearestFilter;
+        var spriteMaterial:SpriteMaterial = new SpriteMaterial( { map: this.spriteMap, color: 0xffffff } );
         this.sprite = new Sprite( spriteMaterial );
         this.sprite.scale.set(1/8, 1/8, 1/8);
+
         this.sprite.position.set(this.x, this.y, 0);
         scene.add(this.sprite);
-
-        this.spriteHalo = new Sprite(spriteFieldMaterial);
-        this.sprite.scale.set(1/8, 1/8, 1/8);
-        this.sprite.position.set(0, 10, 0);//above screen
-        //scene.add(this.sprite);
     }
 
     render(scene:Scene) {
-        if(this.isClickedDown)
-        {
-            scene.add(this.spriteHalo);
-        }
+        
+        // this.animationFrame++;
+        // if(this.animationFrame > 5)
+        // {
+        //     this.animationFrame = 0;
+        // }
 
-        if(this.isClickedUp)
-        {
-            scene.remove(this.spriteHalo);
-        }
+        // this.spriteMap.offset.x = this.animationFrame * 4;
+
+        // if(this.isClickedDown)
+        // {
+        //     scene.add(this.spriteHalo);
+        // }
+
+        // if(this.isClickedUp)
+        // {
+        //     scene.remove(this.spriteHalo);
+        // }
     }
 
     update() {
+        this.tick++;
+
         this.sprite.position.set(this.x, this.y, 0);
-        this.spriteHalo.position.set(this.x, this.y, 0);
+
+        if(this.tick % this.animationDelay == 0) {
+            this.animationFrame++;
+            if(this.animationFrame > 5) {
+                this.animationFrame = 0;
+            }
+        }
+        
+
+        this.spriteMap.offset.x = this.animationFrame / 8;
     }
 }

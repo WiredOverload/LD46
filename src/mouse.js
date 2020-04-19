@@ -18,40 +18,52 @@ var stage_1 = require("./stage");
 var THREE = require('three'); //only needed due to three type shenanigans
 var Mouse = /** @class */ (function (_super) {
     __extends(Mouse, _super);
-    function Mouse(scene, maxAnisotropy) {
+    function Mouse(scene) {
         var _this = _super.call(this) || this;
         _this.x = 0;
         _this.y = 5;
-        var spriteMap = new THREE.TextureLoader().load("assets/magnet.png");
-        var field = new THREE.TextureLoader().load("assets/magneticField.png");
-        field.anisotropy = maxAnisotropy;
-        spriteMap.anisotropy = maxAnisotropy; //renderer.capabilities.getMaxAnisotropy()
-        // spriteMap.minFilter = THREE.NearestFilter;
-        // spriteMap.magFilter = THREE.NearestFilter;
-        var spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap, color: 0xffffff });
-        var spriteFieldMaterial = new THREE.SpriteMaterial({ map: field, color: 0xffffff });
-        //spriteMaterial.map.minFilter = THREE.LinearFilter;
+        _this.spriteMap = new three_1.TextureLoader().load("assets/sparkle3.png");
+        _this.spriteMap.wrapS = _this.spriteMap.wrapT = three_1.RepeatWrapping;
+        _this.spriteMap.repeat.set(1 / 8, 1);
+        _this.animationDelay = 4;
+        _this.animationFrame = 0;
+        _this.tick = 0;
+        _this.spriteMap.anisotropy = 0; //maxAnisotropy;//renderer.capabilities.getMaxAnisotropy()
+        _this.spriteMap.minFilter = three_1.LinearFilter;
+        _this.spriteMap.magFilter = three_1.NearestFilter;
+        var spriteMaterial = new three_1.SpriteMaterial({ map: _this.spriteMap, color: 0xffffff });
         _this.sprite = new three_1.Sprite(spriteMaterial);
         _this.sprite.scale.set(1 / 8, 1 / 8, 1 / 8);
         _this.sprite.position.set(_this.x, _this.y, 0);
         scene.add(_this.sprite);
-        _this.spriteHalo = new three_1.Sprite(spriteFieldMaterial);
-        _this.sprite.scale.set(1 / 8, 1 / 8, 1 / 8);
-        _this.sprite.position.set(0, 10, 0); //above screen
         return _this;
-        //scene.add(this.sprite);
     }
     Mouse.prototype.render = function (scene) {
-        if (this.isClickedDown) {
-            scene.add(this.spriteHalo);
-        }
-        if (this.isClickedUp) {
-            scene.remove(this.spriteHalo);
-        }
+        // this.animationFrame++;
+        // if(this.animationFrame > 5)
+        // {
+        //     this.animationFrame = 0;
+        // }
+        // this.spriteMap.offset.x = this.animationFrame * 4;
+        // if(this.isClickedDown)
+        // {
+        //     scene.add(this.spriteHalo);
+        // }
+        // if(this.isClickedUp)
+        // {
+        //     scene.remove(this.spriteHalo);
+        // }
     };
     Mouse.prototype.update = function () {
+        this.tick++;
         this.sprite.position.set(this.x, this.y, 0);
-        this.spriteHalo.position.set(this.x, this.y, 0);
+        if (this.tick % this.animationDelay == 0) {
+            this.animationFrame++;
+            if (this.animationFrame > 5) {
+                this.animationFrame = 0;
+            }
+        }
+        this.spriteMap.offset.x = this.animationFrame / 8;
     };
     return Mouse;
 }(stage_1.Updateable));

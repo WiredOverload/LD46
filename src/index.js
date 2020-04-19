@@ -10,8 +10,8 @@ var three_1 = require("three");
 var stage_1 = require("./stage");
 var staticImage_1 = require("./staticImage");
 //import { Button } from "./button";
-//import { platform } from "os";
 var mouse_1 = require("./mouse");
+var enemy_1 = require("./enemy");
 var renderer = new three_1.WebGLRenderer();
 //renderer.setSize(window.innerWidth, window.innerHeight);//1:1 scale resolution
 if (window.innerWidth / 16 > window.innerHeight / 9) {
@@ -42,14 +42,14 @@ stageList["win"].update = function () {
     stageList["win"].elementsList["game"].forEach(function (el) { el.update(); });
 };
 //backgrounds
-stageList["main"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["main"].sceneList["ui"], 0, 0, "assets/solidBlue.png", new three_1.Vector3(16, 9, 1)));
+stageList["main"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["main"].sceneList["ui"], 0, 0, "assets/forestFloor.png", new three_1.Vector3(16, 9, 1)));
 //stageList["main"].elementsList["background"].push(new StaticImage(stageList["main"].sceneList["background"], 0, 4.5, "assets/waves1.png", new Vector3(16, 9, 1)));
 //stageList["main"].elementsList["background"].push(new StaticImage(stageList["main"].sceneList["background"], 0, 4.5, "assets/waves2.png", new Vector3(16, 9, 1)));
 //stageList["gameOver"].elementsList["ui"].push(new StaticImage(stageList["gameOver"].sceneList["ui"], 0, 0, "assets/winScreen.png", new Vector3(16, 9, 1)));
 stageList["splash"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["splash"].sceneList["ui"], 0, 0, "assets/Magnet_guy.png", new three_1.Vector3(16, 9, 1)));
 stageList["win"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["win"].sceneList["ui"], 0, 0, "assets/win.png", new three_1.Vector3(16, 9, 1)));
 //stageList["main"].elementsList["game"].push(new Player(stageList["main"].sceneList["game"], renderer.capabilities.getMaxAnisotropy()));
-stageList["main"].elementsList["ui"].push(new mouse_1.Mouse(stageList["main"].sceneList["game"], renderer.capabilities.getMaxAnisotropy()));
+stageList["main"].elementsList["ui"].push(new mouse_1.Mouse(stageList["main"].sceneList["game"]));
 //game screen logic
 stageList["main"].update = function () {
     var localStage = stageList["main"];
@@ -57,13 +57,21 @@ stageList["main"].update = function () {
     //localStage.elementsList["background"][0].x = Math.sin(ticks/16)/4;
     //localStage.elementsList["background"][1].x = -Math.sin(ticks/16)/4;
     //platform spawning
-    if (ticks % 120 == 0) {
-        // var spawnLocation = Math.random();
-        // if(spawnLocation < .25)
-        // {
-        //     localStage.elementsList["game"].push(
-        //         new Platform(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0, ticks / 120));
-        // }
+    if (false) //ticks % 120 == 0)
+     {
+        var spawnLocation = Math.random();
+        if (spawnLocation < .25) {
+            localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+        }
+        else if (spawnLocation >= .25 && spawnLocation < .5) {
+            localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+        }
+        else if (spawnLocation >= .5 && spawnLocation < .75) {
+            localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+        }
+        else if (spawnLocation >= .75) {
+            localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+        }
     }
     localStage.elementsList["game"].forEach(function (el) {
         if (el.isAlive != undefined && !el.isAlive) {
