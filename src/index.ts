@@ -7,6 +7,8 @@
  * Add neutral non-moving state
  * Add placement indicator
  * Add adjacency bonuses
+ * Add Score/lose condition
+ * Add sound
  */
 
 import { Scene, PerspectiveCamera, WebGLRenderer, MinEquation, Vector3, Sprite, Texture, SpriteMaterial, Vector2 } from "three";

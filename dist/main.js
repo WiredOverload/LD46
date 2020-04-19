@@ -48155,7 +48155,6 @@ var stage_1 = __webpack_require__(/*! ./stage */ "./src/stage.js");
 var THREE = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js"); //only needed due to three type shenanigans
 var Enemy = /** @class */ (function (_super) {
     __extends(Enemy, _super);
-    //id:number; //unique id
     function Enemy(scene, x, y, xVel, yVel, type /*, id: number*/) {
         var _this = _super.call(this) || this;
         _this.x = x;
@@ -48170,16 +48169,20 @@ var Enemy = /** @class */ (function (_super) {
         var scaleZ = 1;
         //this.rotationRadians = rotationRadians;//not implementing rotation for awhile
         //this.id = id;
-        var spriteMap;
+        _this.animationDelay = 8;
+        _this.animationFrame = 0;
+        _this.tick = 0;
         switch (type) {
             case 0: {
-                spriteMap = new THREE.TextureLoader().load("assets/Tiny.png");
+                _this.spriteMap = new THREE.TextureLoader().load("assets/Beetle.png");
                 break;
             }
         }
-        spriteMap.minFilter = THREE.NearestFilter;
-        spriteMap.magFilter = THREE.NearestFilter;
-        var spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap, color: 0xffffff });
+        _this.spriteMap.minFilter = three_1.LinearFilter;
+        _this.spriteMap.magFilter = three_1.NearestFilter;
+        _this.spriteMap.wrapS = _this.spriteMap.wrapT = three_1.RepeatWrapping;
+        _this.spriteMap.repeat.set(1 / 8, 1);
+        var spriteMaterial = new THREE.SpriteMaterial({ map: _this.spriteMap, color: 0xffffff });
         _this.sprite = new three_1.Sprite(spriteMaterial);
         _this.sprite.scale.set(scaleX, scaleY, scaleZ); //guesstemates
         scene.add(_this.sprite);
@@ -48191,6 +48194,14 @@ var Enemy = /** @class */ (function (_super) {
         this.x += this.xVelocity;
         this.y += this.yVelocity;
         this.sprite.position.set(this.x, this.y, 0);
+        this.tick++;
+        if (this.tick % this.animationDelay == 0) {
+            this.animationFrame++;
+            if (this.animationFrame > 7) {
+                this.animationFrame = 0;
+            }
+        }
+        this.spriteMap.offset.x = this.animationFrame / 8;
     };
     return Enemy;
 }(stage_1.Updateable));
@@ -48217,6 +48228,8 @@ exports.Enemy = Enemy;
  * Add neutral non-moving state
  * Add placement indicator
  * Add adjacency bonuses
+ * Add Score/lose condition
+ * Add sound
  */
 exports.__esModule = true;
 var three_1 = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");

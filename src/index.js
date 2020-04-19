@@ -8,6 +8,8 @@
  * Add neutral non-moving state
  * Add placement indicator
  * Add adjacency bonuses
+ * Add Score/lose condition
+ * Add sound
  */
 exports.__esModule = true;
 var three_1 = require("three");
