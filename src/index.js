@@ -4,7 +4,6 @@
  * Add placement indicator
  ** Add adjacency bonuses
  * Add sound
- ** Better cursor
  * Balancing
  ** Add rotation
  */
@@ -100,8 +99,6 @@ stageList["main"].update = function () {
     if (currentStage == "main" && ((stragglerX + 4) * 4) >= 1000) {
         currentStage = "win";
     }
-    //var localPlayer: Player = localStage.elementsList["game"].find(el => el instanceof Player);
-    var localMouse = localStage.elementsList["ui"].find(function (el) { return el instanceof mouse_1.Mouse; });
     //general cleanup
     localStage.elementsList["game"].forEach(function (element) {
         if (element.isAlive != undefined && element.x < stragglerX - 20) {
@@ -111,8 +108,6 @@ stageList["main"].update = function () {
     // filter out dead entities
     localStage.elementsList["game"] = localStage.elementsList["game"].filter(function (el) { return el.isAlive || el.isAlive == undefined; });
     localStage.elementsList["game"].forEach(function (el) { el.update(); });
-    //localStage.cameraList["game"].position.set(localPlayer ? localPlayer.x : localStage.cameraList["game"].position.x, localStage.cameraList["game"].position.y, localStage.cameraList["game"].position.z);
-    //collision logic
     var localMinX = 1000000;
     localStage.elementsList["game"].forEach(function (el) {
         localStage.elementsList["game"].forEach(function (el2) {
@@ -139,6 +134,56 @@ stageList["main"].update = function () {
             if (el.x < localMinX) {
                 localMinX = el.x;
             }
+            var adjacent = 0;
+            localStage.elementsList["game"].forEach(function (el2) {
+                if (el2 instanceof structure_1.Structure && el != el2) {
+                    el.x += el.sprite.scale.x;
+                    if (collision(el, el2)) {
+                        adjacent++;
+                    }
+                    el.x -= el.sprite.scale.x;
+                    el.x -= el.sprite.scale.x;
+                    if (collision(el, el2)) {
+                        adjacent++;
+                    }
+                    el.x += el.sprite.scale.x;
+                    el.y += el.sprite.scale.y;
+                    if (collision(el, el2)) {
+                        adjacent++;
+                    }
+                    el.y -= el.sprite.scale.y;
+                    el.y -= el.sprite.scale.y;
+                    if (collision(el, el2)) {
+                        adjacent++;
+                    }
+                    el.y += el.sprite.scale.y;
+                    // if(el2.x - (el2.sprite.scale.x / 2) < el.x &&
+                    // el2.x + (el2.sprite.scale.x / 2) > el.x &&
+                    // el2.y - (el2.sprite.scale.y / 2) < el.y + (el.sprite.scale.y / 4) &&
+                    // el2.y + (el2.sprite.scale.y / 2) > el.y + (el.sprite.scale.y / 4)) {
+                    //     adjacent++;
+                    // }
+                    // else if(el2.x - (el2.sprite.scale.x / 2) < el.x &&
+                    // el2.x + (el2.sprite.scale.x / 2) > el.x &&
+                    // el2.y - (el2.sprite.scale.y / 2) < el.y - (el.sprite.scale.y / 4) &&
+                    // el2.y + (el2.sprite.scale.y / 2) > el.y - (el.sprite.scale.y / 4)) {
+                    //     adjacent++;
+                    // }
+                    // else if(el2.x - (el2.sprite.scale.x / 2) < el.x + (el.sprite.scale.x / 4) &&
+                    // el2.x + (el2.sprite.scale.x / 2) > el.x + (el.sprite.scale.x / 4) &&
+                    // el2.y - (el2.sprite.scale.y / 2) < el.y &&
+                    // el2.y + (el2.sprite.scale.y / 2) > el.y) {
+                    //     adjacent++;
+                    // }
+                    // else if(el2.x - (el2.sprite.scale.x / 2) < el.x - (el.sprite.scale.x / 4) &&
+                    // el2.x + (el2.sprite.scale.x / 2) > el.x - (el.sprite.scale.x / 4) &&
+                    // el2.y - (el2.sprite.scale.y / 2) < el.y &&
+                    // el2.y + (el2.sprite.scale.y / 2) > el.y) {
+                    //     adjacent++;
+                    // }
+                }
+            });
+            el.adjacentStructures = adjacent;
             if (el.spawnTicks > el.spawnCost) {
                 el.spawnTicks -= el.spawnCost;
                 localStage.elementsList["game"].push(new ally_1.Ally(localStage.sceneList["game"], el.x, el.y, 0));

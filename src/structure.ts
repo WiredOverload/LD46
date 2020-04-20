@@ -21,6 +21,7 @@ export class Structure extends Updateable {
     speed:number;
     spawnTicks:number;
     spawnCost:number;
+    adjacentStructures:number;
 
     constructor(scene: Scene, x: number, y: number, type: number/*, id: number*/) {
         super();//needed?
@@ -42,18 +43,19 @@ export class Structure extends Updateable {
         this.animationFrame = 0;
         this.tick = 0;
         this.spawnTicks = 0;
+        this.adjacentStructures = 0;
 
         switch (type) {
             case 0: {
                 this.spriteMap = new THREE.TextureLoader().load("assets/moss1Rotated.png");
                 this.speed = .01;
-                this.spawnCost = 5 * 60;
+                this.spawnCost = 15 * 60;
                 break;
             }
             case 1: {
                 this.spriteMap = new THREE.TextureLoader().load("assets/moss2Rotated.png");
                 this.speed = .015;
-                this.spawnCost = 7 * 60;
+                this.spawnCost = 20 * 60;
                 break;
             }
         }
@@ -99,7 +101,7 @@ export class Structure extends Updateable {
         this.tick++;
 
         if(this.velocity.x == 0 && this.velocity.y == 0) {
-            this.spawnTicks++;
+            this.spawnTicks += 1 + this.adjacentStructures;
         }
 
         if(this.tick % this.animationDelay == 0) {

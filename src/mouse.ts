@@ -17,7 +17,7 @@ export class Mouse extends Updateable{
         super();//needed?
         this.x = 0;
         this.y = 5;
-        this.spriteMap = new TextureLoader().load("assets/sparkle4.png");
+        this.spriteMap = new TextureLoader().load("assets/sparkle5.png");
         this.spriteMap.wrapS = this.spriteMap.wrapT = RepeatWrapping;
         this.spriteMap.repeat.set(1/8, 1);
         this.animationDelay = 4;

@@ -22,7 +22,7 @@ var Mouse = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         _this.x = 0;
         _this.y = 5;
-        _this.spriteMap = new three_1.TextureLoader().load("assets/sparkle4.png");
+        _this.spriteMap = new three_1.TextureLoader().load("assets/sparkle5.png");
         _this.spriteMap.wrapS = _this.spriteMap.wrapT = three_1.RepeatWrapping;
         _this.spriteMap.repeat.set(1 / 8, 1);
         _this.animationDelay = 4;
