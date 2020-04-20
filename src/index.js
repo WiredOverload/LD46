@@ -4,7 +4,6 @@
  * Add placement indicator
  * Add sound
  * Balancing
- ** Add rotation
  */
 exports.__esModule = true;
 var three_1 = require("three");
@@ -29,10 +28,13 @@ document.body.getElementsByClassName('centered-canvas')[0].appendChild(renderer.
 var stageList = {}; //dictionary of all stages
 var currentStage = "splash";
 var win = false;
-var music = new Audio('assets/SFX/OceanSong.wav');
+var music = new Audio('assets/SFX/MossSong.wav');
 music.loop = true;
-//var shootClip = new Audio('assets/SFX/bee_buzz_edit.wav');
-//shootClip.volume = 0.8;
+var burnClip = new Audio('assets/SFX/SFX_Fireball.wav');
+//burnClip.volume = 0.8;
+var buzzClip = new Audio('assets/SFX/bee_buzz_edit.wav');
+buzzClip.volume = 0.8;
+var hitClip = new Audio('assets/SFX/bee_man_get_hit2.wav');
 var ticks = 0;
 var selectedUnit = null; //can't actually use updateable
 var stragglerX = -4;
@@ -51,7 +53,6 @@ stageList["win"].update = function () {
 for (var i = 0; i < 50; i++) { //kinda lazy
     stageList["main"].elementsList["background"].push(new staticImage_1.StaticImage(stageList["main"].sceneList["background"], i * 16, 0, "assets/forestFloor.png", new three_1.Vector3(16, 9, 1)));
 }
-//stageList["gameOver"].elementsList["ui"].push(new StaticImage(stageList["gameOver"].sceneList["ui"], 0, 0, "assets/GenericLoseScreen.png", new Vector3(16, 9, 1)));
 stageList["splash"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["splash"].sceneList["ui"], 0, 0, "assets/BbtL_Splash_Screen.png", new three_1.Vector3(16, 9, 1)));
 stageList["win"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["win"].sceneList["ui"], 0, 0, "assets/win.png", new three_1.Vector3(16, 9, 1)));
 stageList["lose"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["lose"].sceneList["ui"], 0, 0, "assets/GenericLoseScreen.png", new three_1.Vector3(16, 9, 1)));
@@ -92,7 +93,7 @@ stageList["main"].update = function () {
     if (currentStage == "main" && localStage.elementsList["game"].findIndex(function (el) { return el instanceof structure_1.Structure; }) == -1) {
         currentStage = "lose";
         document.getElementById("TICKS").innerHTML =
-            "your moss colony managed to drag itself " + ((stragglerX + 4) * 4) + " Moss Units away towards shelter, just "
+            "your moss colony managed to drag itself " + ((stragglerX + 4) * 4) + " Moss Units towards shelter, just "
                 + (1000 - ((stragglerX + 4) * 4)) + " Moss Units short.";
     }
     if (currentStage == "main" && ((stragglerX + 4) * 4) >= 1000) {
@@ -117,13 +118,18 @@ stageList["main"].update = function () {
                         el.health--;
                         if (el.health < 1) {
                             el.isAlive = false;
+                            burnClip.play();
                         }
                     }
                     if ((el instanceof structure_1.Structure || el instanceof ally_1.Ally) && el.isAlive && el2 instanceof enemy_1.Enemy) {
                         el2.isAlive = false;
                         el.health -= 20;
+                        hitClip.play();
                         if (el.health < 1) {
                             el.isAlive = false;
+                            if (el instanceof structure_1.Structure) {
+                                buzzClip.play();
+                            }
                         }
                     }
                 }
@@ -212,14 +218,14 @@ window.addEventListener("resize", function (e) {
 window.addEventListener("keydown", function (e) {
     e.preventDefault();
     e.stopPropagation();
-    if (music.played != null) {
-        music.play();
-    }
 });
 window.addEventListener("click", function (e) {
     if (currentStage == "splash") {
         currentStage = "main";
         document.getElementById("TICKS").innerHTML = "";
+        if (music.played != null) {
+            music.play();
+        }
     }
 });
 //remove right click functionality

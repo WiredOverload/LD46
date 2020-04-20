@@ -3,7 +3,6 @@
  * Add placement indicator
  * Add sound
  * Balancing
- ** Add rotation
  */
 
 import { Scene, PerspectiveCamera, WebGLRenderer, MinEquation, Vector3, Sprite, Texture, SpriteMaterial, Vector2 } from "three";
@@ -32,10 +31,15 @@ document.body.getElementsByClassName('centered-canvas')[0].appendChild(renderer.
 let stageList: { [key: string]: Stage; } = {};//dictionary of all stages
 var currentStage: string = "splash";
 var win = false;
-var music = new Audio('assets/SFX/OceanSong.wav');
+var music = new Audio('assets/SFX/MossSong.wav');
 music.loop = true;
-//var shootClip = new Audio('assets/SFX/bee_buzz_edit.wav');
-//shootClip.volume = 0.8;
+var burnClip = new Audio('assets/SFX/SFX_Fireball.wav');
+//burnClip.volume = 0.8;
+var buzzClip = new Audio('assets/SFX/bee_buzz_edit.wav');
+buzzClip.volume = 0.8;
+var hitClip = new Audio('assets/SFX/bee_man_get_hit2.wav');
+
+
 var ticks:number = 0;
 var selectedUnit:any = null;//can't actually use updateable
 var stragglerX:number = -4;
@@ -59,7 +63,7 @@ for(var i = 0; i < 50; i++) {//kinda lazy
     stageList["main"].elementsList["background"].push(new StaticImage(stageList["main"].sceneList["background"], i * 16, 0, "assets/forestFloor.png", new Vector3(16, 9, 1)));
 }
 
-//stageList["gameOver"].elementsList["ui"].push(new StaticImage(stageList["gameOver"].sceneList["ui"], 0, 0, "assets/GenericLoseScreen.png", new Vector3(16, 9, 1)));
+
 stageList["splash"].elementsList["ui"].push(new StaticImage(stageList["splash"].sceneList["ui"], 0, 0, "assets/BbtL_Splash_Screen.png", new Vector3(16, 9, 1)));
 stageList["win"].elementsList["ui"].push(new StaticImage(stageList["win"].sceneList["ui"], 0, 0, "assets/win.png", new Vector3(16, 9, 1)));
 stageList["lose"].elementsList["ui"].push(new StaticImage(stageList["lose"].sceneList["ui"], 0, 0, "assets/GenericLoseScreen.png", new Vector3(16, 9, 1)));
@@ -116,7 +120,7 @@ stageList["main"].update = function () {//actual splash screen update logic here
     if(currentStage == "main" && localStage.elementsList["game"].findIndex(el => el instanceof Structure ) == -1) {
         currentStage = "lose";
         document.getElementById("TICKS").innerHTML = 
-            "your moss colony managed to drag itself " + ((stragglerX + 4) * 4) + " Moss Units away towards shelter, just "
+            "your moss colony managed to drag itself " + ((stragglerX + 4) * 4) + " Moss Units towards shelter, just "
              + (1000 - ((stragglerX + 4) * 4)) + " Moss Units short."
     }
 
@@ -146,13 +150,18 @@ stageList["main"].update = function () {//actual splash screen update logic here
                         el.health--;
                         if(el.health < 1) {
                             el.isAlive = false;
+                            burnClip.play();
                         }
                     }
                     if ((el instanceof Structure || el instanceof Ally) && el.isAlive && el2 instanceof Enemy) {
                         el2.isAlive = false;
                         el.health -= 20;
+                        hitClip.play();
                         if(el.health < 1) {
                             el.isAlive = false;
+                            if(el instanceof Structure) {
+                                buzzClip.play();
+                            }
                         }
                     }
                 }
@@ -255,15 +264,15 @@ window.addEventListener("resize", e => {
 window.addEventListener("keydown", e => {
     e.preventDefault();
     e.stopPropagation();
-    if(music.played != null) {
-        music.play();
-    }
 });
 
 window.addEventListener("click", e => { 
     if(currentStage == "splash") {
         currentStage = "main"
         document.getElementById("TICKS").innerHTML = "";
+        if(music.played != null) {
+            music.play();
+        }
     }
 });
 
