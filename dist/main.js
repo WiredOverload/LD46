@@ -48183,8 +48183,8 @@ var Ally = /** @class */ (function (_super) {
         _this.spriteMap.magFilter = three_1.NearestFilter;
         _this.spriteMap.wrapS = _this.spriteMap.wrapT = three_1.RepeatWrapping;
         _this.spriteMap.repeat.set(1 / 16, 1);
-        var spriteMaterial = new THREE.SpriteMaterial({ map: _this.spriteMap, color: 0xffffff });
-        _this.sprite = new three_1.Sprite(spriteMaterial);
+        _this.spriteMaterial = new THREE.SpriteMaterial({ map: _this.spriteMap, color: 0xffffff });
+        _this.sprite = new three_1.Sprite(_this.spriteMaterial);
         _this.sprite.scale.set(scaleX, scaleY, scaleZ); //guesstemates
         scene.add(_this.sprite);
         return _this;
@@ -48203,12 +48203,14 @@ var Ally = /** @class */ (function (_super) {
                         this.y = this.target.y;
                         this.velocity.x = 0;
                         this.velocity.y = 0;
+                        this.spriteMaterial.rotation = 0;
                     }
                 }
                 else {
                     this.angle = Math.atan((this.target.y - this.y) / (this.target.x - this.x));
                     this.velocity.x = Math.cos(this.angle) * this.speed * Math.sign(this.target.x - this.x);
                     this.velocity.y = Math.sin(this.angle) * this.speed * Math.sign(this.target.x - (this.x - .01));
+                    this.spriteMaterial.rotation = this.angle - (Math.PI / 2);
                 }
             }
         }
@@ -48285,8 +48287,8 @@ var Enemy = /** @class */ (function (_super) {
         _this.spriteMap.magFilter = three_1.NearestFilter;
         _this.spriteMap.wrapS = _this.spriteMap.wrapT = three_1.RepeatWrapping;
         _this.spriteMap.repeat.set(1 / 8, 1);
-        var spriteMaterial = new THREE.SpriteMaterial({ map: _this.spriteMap, color: 0xffffff });
-        _this.sprite = new three_1.Sprite(spriteMaterial);
+        _this.spriteMaterial = new THREE.SpriteMaterial({ map: _this.spriteMap, color: 0xffffff });
+        _this.sprite = new three_1.Sprite(_this.spriteMaterial);
         _this.sprite.scale.set(scaleX, scaleY, scaleZ); //guesstemates
         scene.add(_this.sprite);
         return _this;
@@ -48300,6 +48302,7 @@ var Enemy = /** @class */ (function (_super) {
                 this.angle = Math.atan((this.target.y - this.y) / (this.target.x - this.x));
                 this.velocity.x = Math.cos(this.angle) * this.speed * Math.sign(this.target.x - this.x);
                 this.velocity.y = Math.sin(this.angle) * this.speed * Math.sign(this.target.x - (this.x - .01));
+                this.spriteMaterial.rotation = this.angle + (Math.PI / 2);
                 this.x += this.velocity.x;
                 this.y += this.velocity.y;
                 if (Math.abs(this.target.x - this.x) < .1 && Math.abs(this.target.y - this.y) < .1) {
@@ -48995,8 +48998,8 @@ var Structure = /** @class */ (function (_super) {
         _this.spriteMap.magFilter = three_1.NearestFilter;
         _this.spriteMap.wrapS = _this.spriteMap.wrapT = three_1.RepeatWrapping;
         _this.spriteMap.repeat.set(1 / 16, 1);
-        var spriteMaterial = new THREE.SpriteMaterial({ map: _this.spriteMap, color: 0xffffff });
-        _this.sprite = new three_1.Sprite(spriteMaterial);
+        _this.spriteMaterial = new THREE.SpriteMaterial({ map: _this.spriteMap, color: 0xffffff });
+        _this.sprite = new three_1.Sprite(_this.spriteMaterial);
         _this.sprite.scale.set(scaleX, scaleY, scaleZ); //guesstemates
         scene.add(_this.sprite);
         return _this;
@@ -49014,12 +49017,14 @@ var Structure = /** @class */ (function (_super) {
                     this.y = this.target.y;
                     this.velocity.x = 0;
                     this.velocity.y = 0;
+                    this.spriteMaterial.rotation = 0;
                 }
             }
             else {
                 this.angle = Math.atan((this.target.y - this.y) / (this.target.x - this.x));
                 this.velocity.x = Math.cos(this.angle) * this.speed * Math.sign(this.target.x - this.x);
                 this.velocity.y = Math.sin(this.angle) * this.speed * Math.sign(this.target.x - (this.x - .01));
+                this.spriteMaterial.rotation = this.angle; // + (Math.PI / 2);
             }
         }
         this.sprite.position.set(this.x, this.y, 0);

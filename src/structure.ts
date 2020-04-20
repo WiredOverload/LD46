@@ -22,6 +22,7 @@ export class Structure extends Updateable {
     spawnTicks:number;
     spawnCost:number;
     adjacentStructures:number;
+    spriteMaterial:SpriteMaterial;
 
     constructor(scene: Scene, x: number, y: number, type: number/*, id: number*/) {
         super();//needed?
@@ -63,8 +64,8 @@ export class Structure extends Updateable {
         this.spriteMap.magFilter = NearestFilter;
         this.spriteMap.wrapS = this.spriteMap.wrapT = RepeatWrapping;
         this.spriteMap.repeat.set(1/16, 1);
-        var spriteMaterial: SpriteMaterial = new THREE.SpriteMaterial({ map: this.spriteMap, color: 0xffffff });
-        this.sprite = new Sprite(spriteMaterial);
+        this.spriteMaterial = new THREE.SpriteMaterial({ map: this.spriteMap, color: 0xffffff });
+        this.sprite = new Sprite(this.spriteMaterial);
         this.sprite.scale.set(scaleX, scaleY, scaleZ);//guesstemates
         scene.add(this.sprite);
     }
@@ -85,6 +86,7 @@ export class Structure extends Updateable {
                     this.y = this.target.y;
                     this.velocity.x = 0;
                     this.velocity.y = 0;
+                    this.spriteMaterial.rotation = 0;
                 }
             }
             else
@@ -92,6 +94,8 @@ export class Structure extends Updateable {
                 this.angle = Math.atan((this.target.y - this.y)/(this.target.x - this.x));
                 this.velocity.x = Math.cos(this.angle) * this.speed * Math.sign(this.target.x - this.x);
                 this.velocity.y = Math.sin(this.angle) * this.speed * Math.sign(this.target.x - (this.x - .01));
+
+                this.spriteMaterial.rotation = this.angle;// + (Math.PI / 2);
             }
         }
         
