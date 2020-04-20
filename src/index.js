@@ -1,7 +1,5 @@
 "use strict";
 /**
- * Add enemies
- * Add ally spawns
  * Add neutral non-moving state
  * Add placement indicator
  * Add adjacency bonuses
@@ -16,6 +14,7 @@ var mouse_1 = require("./mouse");
 var enemy_1 = require("./enemy");
 var light_1 = require("./light");
 var structure_1 = require("./structure");
+var ally_1 = require("./ally");
 var renderer = new three_1.WebGLRenderer();
 //renderer.setSize(window.innerWidth, window.innerHeight);//1:1 scale resolution
 if (window.innerWidth / 16 > window.innerHeight / 9) {
@@ -63,27 +62,22 @@ for (var i = 0; i < 9; i++) {
 stageList["main"].update = function () {
     var localStage = stageList["main"];
     //enemy spawning
-    // if(ticks % 120 == 0)
-    // {
-    //     var spawnLocation = Math.random();
-    //     if(spawnLocation < .5)
-    //     {
-    //         localStage.elementsList["game"].push(
-    //             new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
-    //     }
-    //     else if(spawnLocation >= .5)
-    //     {
-    //         localStage.elementsList["game"].push(
-    //             new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, -.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
-    //     }
-    // }
+    if (ticks % 180 == 0) {
+        var spawnLocation = Math.random();
+        if (spawnLocation < .5) {
+            localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + stragglerX + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+        }
+        else if (spawnLocation >= .5) {
+            localStage.elementsList["game"].push(new enemy_1.Enemy(localStage.sceneList["game"], (Math.random() * 14) + stragglerX + 1, -.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+        }
+    }
     //light spawning
-    if (ticks % 480 == 0) {
+    if (ticks % 240 == 0) {
         var spawnX = Math.random();
         var spawnY = Math.random();
         localStage.elementsList["game"].push(new light_1.LightBeam(localStage.sceneList["game"], (Math.round(((spawnX * 16) + (stragglerX /* + 4*/)) * 4) / 4) + (1 / 8), (Math.round((spawnY * 9) * 4) / 4) + (1 / 8), 0, 0, 0));
     }
-    else if ((ticks + 240) % 480 == 0) {
+    else if ((ticks + 120) % 240 == 0) {
         var spawnX = Math.random();
         var spawnY = Math.random();
         localStage.elementsList["game"].push(new light_1.LightBeam(localStage.sceneList["game"], (Math.round((((spawnX * 8) - 4) + (stragglerX /* + 4*/)) * 4) / 4) + (1 / 8), (Math.round(spawnY * 9 * 4) / 4) + (1 / 8), 0, 0, 0));
@@ -93,35 +87,35 @@ stageList["main"].update = function () {
             localStage.sceneList["game"].remove(el.sprite);
         }
     });
-    // if(localStage.elementsList["game"].findIndex(el => { el instanceof Structure }) == -1) {
-    //     currentStage = "win";//mess with later
-    // }
+    if (currentStage == "main" && localStage.elementsList["game"].findIndex(function (el) { return el instanceof structure_1.Structure; }) == -1) {
+        currentStage = "win"; //mess with later
+    }
     //var localPlayer: Player = localStage.elementsList["game"].find(el => el instanceof Player);
     var localMouse = localStage.elementsList["ui"].find(function (el) { return el instanceof mouse_1.Mouse; });
+    //general cleanup
+    localStage.elementsList["game"].forEach(function (element) {
+        if (element.isAlive != undefined && element.x < stragglerX - 20) {
+            element.isAlive = false;
+        }
+    });
     // filter out dead entities
     localStage.elementsList["game"] = localStage.elementsList["game"].filter(function (el) { return el.isAlive || el.isAlive == undefined; });
-    // localStage.elementsList["game"].forEach(element => {
-    //     if (element.isAlive != undefined && element.x < localPlayer.x - 16) {
-    //         element.isAlive = false;
-    //     }
-    // });
     localStage.elementsList["game"].forEach(function (el) { el.update(); });
     //localStage.cameraList["game"].position.set(localPlayer ? localPlayer.x : localStage.cameraList["game"].position.x, localStage.cameraList["game"].position.y, localStage.cameraList["game"].position.z);
     //collision logic
     var localMinX = 1000000;
     localStage.elementsList["game"].forEach(function (el) {
         localStage.elementsList["game"].forEach(function (el2) {
-            if (el !== el2) { // only check for collision between two different objects
+            if (el !== el2) {
                 if (collision(el, el2)) {
-                    // if player collides with an enemy projectile, take damage   
-                    if (el instanceof structure_1.Structure && el.isAlive && el2 instanceof light_1.LightBeam && el2.tick > 180) {
-                        //el2.isAlive = false;
+                    // if player collides with a light beam, take damage   
+                    if ((el instanceof structure_1.Structure || el instanceof ally_1.Ally) && el.isAlive && el2 instanceof light_1.LightBeam && el2.tick > 180) {
                         el.health--;
                         if (el.health < 1) {
                             el.isAlive = false;
                         }
                     }
-                    if (el instanceof structure_1.Structure && el.isAlive && el2 instanceof enemy_1.Enemy) {
+                    if ((el instanceof structure_1.Structure || el instanceof ally_1.Ally) && el.isAlive && el2 instanceof enemy_1.Enemy) {
                         el2.isAlive = false;
                         el.health -= 20;
                         if (el.health < 1) {
@@ -131,8 +125,25 @@ stageList["main"].update = function () {
                 }
             }
         });
-        if (!(el instanceof enemy_1.Enemy) && !(el instanceof light_1.LightBeam) && el.x < localMinX) {
-            localMinX = el.x;
+        if (el instanceof structure_1.Structure) {
+            if (el.x < localMinX) {
+                localMinX = el.x;
+            }
+            if (el.spawnTicks > el.spawnCost) {
+                el.spawnTicks -= el.spawnCost;
+                localStage.elementsList["game"].push(new ally_1.Ally(localStage.sceneList["game"], el.x, el.y, 0));
+            }
+        }
+        else if (el instanceof enemy_1.Enemy) {
+            var closest = new three_1.Vector2(1000000, 1000000);
+            var vec = new three_1.Vector2(el.x, el.y);
+            localStage.elementsList["game"].forEach(function (el2) {
+                if (el2 instanceof structure_1.Structure &&
+                    vec.distanceTo(new three_1.Vector2(el2.x, el2.y)) < vec.distanceTo(closest)) {
+                    closest = new three_1.Vector2(el2.x, el2.y);
+                }
+            });
+            el.target = closest;
         }
     });
     if (localMinX > stragglerX) {
@@ -141,7 +152,7 @@ stageList["main"].update = function () {
     localStage.cameraList["game"].position.setX(stragglerX + 4);
 };
 //main update
-var interval = setInterval(update, 1000 / 60); //60 ticks per second
+var interval = setInterval(update, 1000 / 45); //60 ticks per second
 function update() {
     ticks++;
     stageList[currentStage].baseUpdate();
@@ -198,6 +209,10 @@ window.addEventListener("click", function (e) {
         currentStage = "main";
     }
 });
+//remove right click functionality
+window.addEventListener("contextmenu", function (e) {
+    e.preventDefault();
+});
 window.addEventListener("mousemove", function (e) {
     var mouse = stageList["main"].elementsList["ui"].find(function (el) { return el instanceof mouse_1.Mouse; });
     mouse.x = ((e.clientX / window.innerWidth) * 16) - 8;
@@ -212,7 +227,10 @@ window.addEventListener("mouseup", function (e) {
     if (currentStage == "main") {
         if (selectedUnit == null) {
             stageList["main"].elementsList["game"].forEach(function (el) {
-                if (!(el instanceof enemy_1.Enemy) && !(el instanceof light_1.LightBeam) && collision(el, mouse)) {
+                if (e.which == 3 && el instanceof ally_1.Ally && collision(el, mouse)) {
+                    selectedUnit = el;
+                }
+                else if (e.which == 1 && el instanceof structure_1.Structure && collision(el, mouse)) {
                     selectedUnit = el;
                 }
             });

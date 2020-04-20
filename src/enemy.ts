@@ -40,12 +40,12 @@ export class Enemy extends Updateable {
 
         switch (type) {
             case 0: {
-                this.spriteMap = new THREE.TextureLoader().load("assets/Beetle.png");
+                this.spriteMap = new THREE.TextureLoader().load("assets/Beetle1.png");
                 this.speed = .02;
                 break;
             }
         }
-        this.spriteMap.minFilter = LinearFilter;
+        this.spriteMap.minFilter = NearestFilter;//linear
         this.spriteMap.magFilter = NearestFilter;
         this.spriteMap.wrapS = this.spriteMap.wrapT = RepeatWrapping;
         this.spriteMap.repeat.set(1/8, 1);
@@ -62,22 +62,18 @@ export class Enemy extends Updateable {
     update() {
         if(this.target) {
             if(!(this.target.x == 0 && this.target.y == 0) &&
-            this.x != this.target.x && this.y != this.target.y){
-                if(this.velocity.x != 0 || this.velocity.y != 0){
-                    this.x += this.velocity.x;
-                    this.y += this.velocity.y;
-                    if(Math.abs(this.target.x - this.x) < .1 && Math.abs(this.target.y - this.y) < .1){
-                        this.x = this.target.x;
-                        this.y = this.target.y;
-                        this.velocity.x = 0;
-                        this.velocity.y = 0;
-                    }
-                }
-                else
-                {
-                    this.angle = Math.atan((this.target.y - this.y)/(this.target.x - this.x));
-                    this.velocity.x = Math.cos(this.angle) * this.speed * Math.sign(this.target.x - this.x);
-                    this.velocity.y = Math.sin(this.angle) * this.speed* Math.sign(this.target.x - this.x);
+            !(this.x == this.target.x && this.y == this.target.y)){
+                this.angle = Math.atan((this.target.y - this.y)/(this.target.x - this.x));
+                this.velocity.x = Math.cos(this.angle) * this.speed * Math.sign(this.target.x - this.x);
+                this.velocity.y = Math.sin(this.angle) * this.speed * Math.sign(this.target.x - (this.x - .01));
+
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                if(Math.abs(this.target.x - this.x) < .1 && Math.abs(this.target.y - this.y) < .1){
+                    this.x = this.target.x;
+                    this.y = this.target.y;
+                    this.velocity.x = 0;
+                    this.velocity.y = 0;
                 }
             }
         }

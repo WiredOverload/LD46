@@ -1,6 +1,4 @@
 /**
- * Add enemies
- * Add ally spawns
  * Add neutral non-moving state
  * Add placement indicator
  * Add adjacency bonuses
@@ -16,6 +14,7 @@ import { Mouse } from "./mouse";
 import { Enemy } from "./enemy";
 import { LightBeam } from "./light";
 import { Structure } from "./structure";
+import { Ally } from "./ally";
 
 var renderer: WebGLRenderer = new WebGLRenderer();
 //renderer.setSize(window.innerWidth, window.innerHeight);//1:1 scale resolution
@@ -74,30 +73,30 @@ stageList["main"].update = function () {//actual splash screen update logic here
     var localStage: Stage = stageList["main"];
 
     //enemy spawning
-    // if(ticks % 120 == 0)
-    // {
-    //     var spawnLocation = Math.random();
-    //     if(spawnLocation < .5)
-    //     {
-    //         localStage.elementsList["game"].push(
-    //             new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
-    //     }
-    //     else if(spawnLocation >= .5)
-    //     {
-    //         localStage.elementsList["game"].push(
-    //             new Enemy(localStage.sceneList["game"], (Math.random() * 14) + 1, -.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
-    //     }
-    // }
+    if(ticks % 180 == 0)
+    {
+        var spawnLocation = Math.random();
+        if(spawnLocation < .5)
+        {
+            localStage.elementsList["game"].push(
+                new Enemy(localStage.sceneList["game"], (Math.random() * 14) + stragglerX + 1, 9.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+        }
+        else if(spawnLocation >= .5)
+        {
+            localStage.elementsList["game"].push(
+                new Enemy(localStage.sceneList["game"], (Math.random() * 14) + stragglerX + 1, -.5, (Math.random() * .04) - .02, -Math.random() * .02, 0));
+        }
+    }
 
     //light spawning
-    if(ticks % 480 == 0)
+    if(ticks % 240 == 0)
     {
         var spawnX:number = Math.random();
         var spawnY:number = Math.random();
         localStage.elementsList["game"].push(
             new LightBeam(localStage.sceneList["game"], (Math.round(((spawnX * 16) + (stragglerX/* + 4*/)) * 4) / 4) + (1/8), (Math.round((spawnY * 9) * 4) / 4) + (1/8), 0, 0, 0));
     }
-    else if((ticks + 240) % 480 == 0)
+    else if((ticks + 120) % 240 == 0)
     {
         var spawnX:number = Math.random();
         var spawnY:number = Math.random();
@@ -112,21 +111,22 @@ stageList["main"].update = function () {//actual splash screen update logic here
         }
     });
 
-    // if(localStage.elementsList["game"].findIndex(el => { el instanceof Structure }) == -1) {
-    //     currentStage = "win";//mess with later
-    // }
+    if(currentStage == "main" && localStage.elementsList["game"].findIndex(el => el instanceof Structure ) == -1) {
+        currentStage = "win";//mess with later
+    }
 
     //var localPlayer: Player = localStage.elementsList["game"].find(el => el instanceof Player);
     var localMouse:Mouse = localStage.elementsList["ui"].find(el => el instanceof Mouse);
-    
+
+    //general cleanup
+    localStage.elementsList["game"].forEach(element => {
+        if (element.isAlive != undefined && element.x < stragglerX - 20) {
+            element.isAlive = false;
+        }
+    });
+
     // filter out dead entities
     localStage.elementsList["game"] = localStage.elementsList["game"].filter(el => el.isAlive || el.isAlive == undefined);
-
-    // localStage.elementsList["game"].forEach(element => {
-    //     if (element.isAlive != undefined && element.x < localPlayer.x - 16) {
-    //         element.isAlive = false;
-    //     }
-    // });
 
     localStage.elementsList["game"].forEach(el => { el.update() });
     //localStage.cameraList["game"].position.set(localPlayer ? localPlayer.x : localStage.cameraList["game"].position.x, localStage.cameraList["game"].position.y, localStage.cameraList["game"].position.z);
@@ -135,17 +135,16 @@ stageList["main"].update = function () {//actual splash screen update logic here
     var localMinX:number = 1000000;
     localStage.elementsList["game"].forEach(el => {
         localStage.elementsList["game"].forEach(el2 => {
-            if (el !== el2) { // only check for collision between two different objects
+            if (el !== el2) {
                 if (collision(el, el2)) {
-                    // if player collides with an enemy projectile, take damage   
-                    if (el instanceof Structure && el.isAlive && el2 instanceof LightBeam && el2.tick > 180) {
-                        //el2.isAlive = false;
+                    // if player collides with a light beam, take damage   
+                    if ((el instanceof Structure || el instanceof Ally) && el.isAlive && el2 instanceof LightBeam && el2.tick > 180) {
                         el.health--;
                         if(el.health < 1) {
                             el.isAlive = false;
                         }
                     }
-                    if (el instanceof Structure && el.isAlive && el2 instanceof Enemy) {
+                    if ((el instanceof Structure || el instanceof Ally) && el.isAlive && el2 instanceof Enemy) {
                         el2.isAlive = false;
                         el.health -= 20;
                         if(el.health < 1) {
@@ -156,8 +155,27 @@ stageList["main"].update = function () {//actual splash screen update logic here
             }
         });
 
-        if(!(el instanceof Enemy) && !(el instanceof LightBeam) && el.x < localMinX){
-            localMinX = el.x
+        if(el instanceof Structure){
+            if(el.x < localMinX) {
+                localMinX = el.x;
+            }
+
+            if(el.spawnTicks > el.spawnCost) {
+                el.spawnTicks -= el.spawnCost;
+                localStage.elementsList["game"].push(
+                    new Ally(localStage.sceneList["game"], el.x, el.y, 0));
+            }
+        }
+        else if(el instanceof Enemy) {
+            var closest:Vector2 = new Vector2(1000000, 1000000);
+            var vec:Vector2 = new Vector2(el.x, el.y)
+            localStage.elementsList["game"].forEach(el2 => {
+                if(el2 instanceof Structure &&
+                    vec.distanceTo(new Vector2(el2.x, el2.y)) < vec.distanceTo(closest)) {
+                        closest = new Vector2(el2.x, el2.y);
+                }
+            });
+            el.target = closest;
         }
     });
 
@@ -168,7 +186,7 @@ stageList["main"].update = function () {//actual splash screen update logic here
 }
 
 //main update
-var interval = setInterval(update, 1000 / 60);//60 ticks per second
+var interval = setInterval(update, 1000 / 45);//60 ticks per second
 function update() {
     ticks++;
     stageList[currentStage].baseUpdate();
@@ -236,6 +254,11 @@ window.addEventListener("click", e => {
     }
 });
 
+//remove right click functionality
+window.addEventListener("contextmenu", e => {
+    e.preventDefault();
+});
+
 window.addEventListener("mousemove", e => { 
     var mouse:Mouse = stageList["main"].elementsList["ui"].find(el => el instanceof Mouse);
     mouse.x = ((e.clientX / window.innerWidth) * 16) - 8;
@@ -252,7 +275,10 @@ window.addEventListener("mouseup", e => {
     if(currentStage == "main"){
         if(selectedUnit == null){
             stageList["main"].elementsList["game"].forEach(el => {
-                if(!(el instanceof Enemy) && !(el instanceof LightBeam) && collision(el, mouse)){
+                if(e.which == 3 && el instanceof Ally && collision(el, mouse)){
+                    selectedUnit = el;
+                }
+                else if(e.which == 1 && el instanceof Structure && collision(el, mouse)){
                     selectedUnit = el;
                 }
             });
