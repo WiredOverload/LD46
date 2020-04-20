@@ -48339,7 +48339,6 @@ exports.Enemy = Enemy;
 /**
  * Add neutral non-moving state
  * Add placement indicator
- ** Add adjacency bonuses
  * Add sound
  * Balancing
  ** Add rotation
@@ -48494,30 +48493,6 @@ stageList["main"].update = function () {
                         adjacent++;
                     }
                     el.y += el.sprite.scale.y;
-                    // if(el2.x - (el2.sprite.scale.x / 2) < el.x &&
-                    // el2.x + (el2.sprite.scale.x / 2) > el.x &&
-                    // el2.y - (el2.sprite.scale.y / 2) < el.y + (el.sprite.scale.y / 4) &&
-                    // el2.y + (el2.sprite.scale.y / 2) > el.y + (el.sprite.scale.y / 4)) {
-                    //     adjacent++;
-                    // }
-                    // else if(el2.x - (el2.sprite.scale.x / 2) < el.x &&
-                    // el2.x + (el2.sprite.scale.x / 2) > el.x &&
-                    // el2.y - (el2.sprite.scale.y / 2) < el.y - (el.sprite.scale.y / 4) &&
-                    // el2.y + (el2.sprite.scale.y / 2) > el.y - (el.sprite.scale.y / 4)) {
-                    //     adjacent++;
-                    // }
-                    // else if(el2.x - (el2.sprite.scale.x / 2) < el.x + (el.sprite.scale.x / 4) &&
-                    // el2.x + (el2.sprite.scale.x / 2) > el.x + (el.sprite.scale.x / 4) &&
-                    // el2.y - (el2.sprite.scale.y / 2) < el.y &&
-                    // el2.y + (el2.sprite.scale.y / 2) > el.y) {
-                    //     adjacent++;
-                    // }
-                    // else if(el2.x - (el2.sprite.scale.x / 2) < el.x - (el.sprite.scale.x / 4) &&
-                    // el2.x + (el2.sprite.scale.x / 2) > el.x - (el.sprite.scale.x / 4) &&
-                    // el2.y - (el2.sprite.scale.y / 2) < el.y &&
-                    // el2.y + (el2.sprite.scale.y / 2) > el.y) {
-                    //     adjacent++;
-                    // }
                 }
             });
             el.adjacentStructures = adjacent;
@@ -48577,25 +48552,7 @@ window.addEventListener("keydown", function (e) {
     if (music.played != null) {
         music.play();
     }
-    // if (currentStage == "main") {
-    //     //mouse controls planned
-    // }
 });
-/* movement controls for the player */
-// window.addEventListener("keyup", e => {
-//     if (currentStage == "main") {
-//         //mouse controls planned
-//     }
-// });
-// var respawn = function () {
-//     // respawn player to starting position
-//     var player: Player = stageList["main"].elementsList["game"].find(el => el instanceof Player);
-//     if (player) {
-//         player.x = 0;
-//         player.y = 0;
-//         player.isAlive = true;
-//     }
-// }
 window.addEventListener("click", function (e) {
     if (currentStage == "splash") {
         currentStage = "main";
