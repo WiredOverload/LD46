@@ -89,7 +89,7 @@ export class Structure extends Updateable {
             {
                 this.angle = Math.atan((this.target.y - this.y)/(this.target.x - this.x));
                 this.velocity.x = Math.cos(this.angle) * this.speed * Math.sign(this.target.x - this.x);
-                this.velocity.y = Math.sin(this.angle) * this.speed * Math.sign(this.target.x - this.x);
+                this.velocity.y = Math.sin(this.angle) * this.speed * Math.sign(this.target.x - (this.x - .01));
             }
         }
         

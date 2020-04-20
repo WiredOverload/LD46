@@ -1,7 +1,5 @@
 "use strict";
 /**
- * Fix moving in straight lines
- * Add light obstacles
  * Add enemies
  * Add ally spawns
  * Add neutral non-moving state
@@ -83,18 +81,21 @@ stageList["main"].update = function () {
     if (ticks % 480 == 0) {
         var spawnX = Math.random();
         var spawnY = Math.random();
-        localStage.elementsList["game"].push(new light_1.LightBeam(localStage.sceneList["game"], (Math.round(((spawnX * 16) + (stragglerX + 4)) * 4) / 4) + (1 / 8), (Math.round((spawnY * 9) * 4) / 4) + (1 / 8), 0, 0, 0));
+        localStage.elementsList["game"].push(new light_1.LightBeam(localStage.sceneList["game"], (Math.round(((spawnX * 16) + (stragglerX /* + 4*/)) * 4) / 4) + (1 / 8), (Math.round((spawnY * 9) * 4) / 4) + (1 / 8), 0, 0, 0));
     }
     else if ((ticks + 240) % 480 == 0) {
         var spawnX = Math.random();
         var spawnY = Math.random();
-        localStage.elementsList["game"].push(new light_1.LightBeam(localStage.sceneList["game"], (Math.round((((spawnX * 8) - 4) + (stragglerX + 4)) * 4) / 4) + (1 / 8), (Math.round(spawnY * 9 * 4) / 4) + (1 / 8), 0, 0, 0));
+        localStage.elementsList["game"].push(new light_1.LightBeam(localStage.sceneList["game"], (Math.round((((spawnX * 8) - 4) + (stragglerX /* + 4*/)) * 4) / 4) + (1 / 8), (Math.round(spawnY * 9 * 4) / 4) + (1 / 8), 0, 0, 0));
     }
     localStage.elementsList["game"].forEach(function (el) {
         if (el.isAlive != undefined && !el.isAlive) {
             localStage.sceneList["game"].remove(el.sprite);
         }
     });
+    // if(localStage.elementsList["game"].findIndex(el => { el instanceof Structure }) == -1) {
+    //     currentStage = "win";//mess with later
+    // }
     //var localPlayer: Player = localStage.elementsList["game"].find(el => el instanceof Player);
     var localMouse = localStage.elementsList["ui"].find(function (el) { return el instanceof mouse_1.Mouse; });
     // filter out dead entities

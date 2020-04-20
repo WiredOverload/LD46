@@ -1,6 +1,4 @@
 /**
- * Fix moving in straight lines
- * Add light obstacles
  * Add enemies
  * Add ally spawns
  * Add neutral non-moving state
@@ -97,21 +95,26 @@ stageList["main"].update = function () {//actual splash screen update logic here
         var spawnX:number = Math.random();
         var spawnY:number = Math.random();
         localStage.elementsList["game"].push(
-            new LightBeam(localStage.sceneList["game"], (Math.round(((spawnX * 16) + (stragglerX + 4)) * 4) / 4) + (1/8), (Math.round((spawnY * 9) * 4) / 4) + (1/8), 0, 0, 0));
+            new LightBeam(localStage.sceneList["game"], (Math.round(((spawnX * 16) + (stragglerX/* + 4*/)) * 4) / 4) + (1/8), (Math.round((spawnY * 9) * 4) / 4) + (1/8), 0, 0, 0));
     }
     else if((ticks + 240) % 480 == 0)
     {
         var spawnX:number = Math.random();
         var spawnY:number = Math.random();
         localStage.elementsList["game"].push(
-            new LightBeam(localStage.sceneList["game"], (Math.round((((spawnX * 8) - 4) + (stragglerX + 4)) * 4) / 4) + (1/8), (Math.round(spawnY * 9 * 4) / 4) + (1/8), 0, 0, 0));
+            new LightBeam(localStage.sceneList["game"], (Math.round((((spawnX * 8) - 4) + (stragglerX/* + 4*/)) * 4) / 4) + (1/8), (Math.round(spawnY * 9 * 4) / 4) + (1/8), 0, 0, 0));
     }
+
 
     localStage.elementsList["game"].forEach(el => {
         if (el.isAlive != undefined && !el.isAlive) {
             localStage.sceneList["game"].remove(el.sprite);
         }
     });
+
+    // if(localStage.elementsList["game"].findIndex(el => { el instanceof Structure }) == -1) {
+    //     currentStage = "win";//mess with later
+    // }
 
     //var localPlayer: Player = localStage.elementsList["game"].find(el => el instanceof Player);
     var localMouse:Mouse = localStage.elementsList["ui"].find(el => el instanceof Mouse);
