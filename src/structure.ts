@@ -97,7 +97,10 @@ export class Structure extends Updateable {
         this.sprite.position.set(this.x, this.y, 0);
 
         this.tick++;
-        this.spawnTicks++;
+
+        if(this.velocity.x == 0 && this.velocity.y == 0) {
+            this.spawnTicks++;
+        }
 
         if(this.tick % this.animationDelay == 0) {
             this.animationFrame++;

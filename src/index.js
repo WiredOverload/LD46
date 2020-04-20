@@ -2,9 +2,11 @@
 /**
  * Add neutral non-moving state
  * Add placement indicator
- * Add adjacency bonuses
- * Add Score/lose condition
+ ** Add adjacency bonuses
  * Add sound
+ ** Better cursor
+ * Balancing
+ ** Add rotation
  */
 exports.__esModule = true;
 var three_1 = require("three");

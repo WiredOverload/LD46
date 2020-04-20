@@ -48339,9 +48339,11 @@ exports.Enemy = Enemy;
 /**
  * Add neutral non-moving state
  * Add placement indicator
- * Add adjacency bonuses
- * Add Score/lose condition
+ ** Add adjacency bonuses
  * Add sound
+ ** Better cursor
+ * Balancing
+ ** Add rotation
  */
 exports.__esModule = true;
 var three_1 = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
@@ -49019,7 +49021,9 @@ var Structure = /** @class */ (function (_super) {
         }
         this.sprite.position.set(this.x, this.y, 0);
         this.tick++;
-        this.spawnTicks++;
+        if (this.velocity.x == 0 && this.velocity.y == 0) {
+            this.spawnTicks++;
+        }
         if (this.tick % this.animationDelay == 0) {
             this.animationFrame++;
             if (this.animationFrame > 15) {

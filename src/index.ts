@@ -1,9 +1,11 @@
 /**
  * Add neutral non-moving state
  * Add placement indicator
- * Add adjacency bonuses
- * Add Score/lose condition
+ ** Add adjacency bonuses
  * Add sound
+ ** Better cursor
+ * Balancing
+ ** Add rotation
  */
 
 import { Scene, PerspectiveCamera, WebGLRenderer, MinEquation, Vector3, Sprite, Texture, SpriteMaterial, Vector2 } from "three";
