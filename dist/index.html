@@ -5,13 +5,30 @@
 			body { margin: 0; }
 			canvas { width: 100%; height: 100%}
 			body { background-color: black; background-image: url(assets/crystalBackground1.png); background-size: 100% 100%; background-repeat: no-repeat; image-rendering: pixelated}
-			.centered-canvas { text-align: center;}
+			.centered-canvas { text-align: center; /*position: relative; z-index: 1;*/}
 			* {cursor: none;}
+			#TICKS {
+				/* position: absolute; */
+				/* top: 10px; */
+				/* width: 100%; */
+				/* text-align: center; */
+				/* z-index: 1; */
+				/* display:inline; */
+				/* line-height: 150px; */
+
+				position: absolute;
+				/* top: 10px; */
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+			}
 		</style>
 	</head>
 	<body>
+		
 		<div class="centered-canvas">
-			
+			<h1 id="TICKS", style="color:white">Click to Play</h1>
 		</div>
 		<script type="text/javascript" src="main.js"></script>
 	</body>

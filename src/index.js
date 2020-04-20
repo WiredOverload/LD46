@@ -39,6 +39,7 @@ var stragglerX = -4;
 stageList["main"] = new stage_1.Stage();
 stageList["splash"] = new stage_1.Stage();
 stageList["win"] = new stage_1.Stage();
+stageList["lose"] = new stage_1.Stage();
 //splash screen logic
 stageList["splash"].update = function () {
     stageList["splash"].elementsList["game"].forEach(function (el) { el.update(); });
@@ -53,6 +54,7 @@ for (var i = 0; i < 50; i++) { //kinda lazy
 //stageList["gameOver"].elementsList["ui"].push(new StaticImage(stageList["gameOver"].sceneList["ui"], 0, 0, "assets/GenericLoseScreen.png", new Vector3(16, 9, 1)));
 stageList["splash"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["splash"].sceneList["ui"], 0, 0, "assets/BbtL_Splash_Screen.png", new three_1.Vector3(16, 9, 1)));
 stageList["win"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["win"].sceneList["ui"], 0, 0, "assets/win.png", new three_1.Vector3(16, 9, 1)));
+stageList["lose"].elementsList["ui"].push(new staticImage_1.StaticImage(stageList["lose"].sceneList["ui"], 0, 0, "assets/GenericLoseScreen.png", new three_1.Vector3(16, 9, 1)));
 stageList["main"].elementsList["ui"].push(new mouse_1.Mouse(stageList["main"].sceneList["ui"]));
 //initial colony placement
 for (var i = 0; i < 9; i++) {
@@ -88,7 +90,13 @@ stageList["main"].update = function () {
         }
     });
     if (currentStage == "main" && localStage.elementsList["game"].findIndex(function (el) { return el instanceof structure_1.Structure; }) == -1) {
-        currentStage = "win"; //mess with later
+        currentStage = "lose";
+        document.getElementById("TICKS").innerHTML =
+            "your moss colony managed to drag itself " + ((stragglerX + 4) * 4) + " Moss Units away towards shelter, just "
+                + (1000 - ((stragglerX + 4) * 4)) + " Moss Units short.";
+    }
+    if (currentStage == "main" && ((stragglerX + 4) * 4) >= 1000) {
+        currentStage = "win";
     }
     //var localPlayer: Player = localStage.elementsList["game"].find(el => el instanceof Player);
     var localMouse = localStage.elementsList["ui"].find(function (el) { return el instanceof mouse_1.Mouse; });
@@ -146,7 +154,7 @@ stageList["main"].update = function () {
             el.target = closest;
         }
     });
-    if (localMinX > stragglerX) {
+    if (localMinX != 1000000 && localMinX > stragglerX) {
         stragglerX = localMinX;
     }
     localStage.cameraList["game"].position.setX(stragglerX + 4);
@@ -207,6 +215,7 @@ window.addEventListener("keydown", function (e) {
 window.addEventListener("click", function (e) {
     if (currentStage == "splash") {
         currentStage = "main";
+        document.getElementById("TICKS").innerHTML = "";
     }
 });
 //remove right click functionality

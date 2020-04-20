@@ -43,6 +43,7 @@ var stragglerX:number = -4;
 stageList["main"] = new Stage();
 stageList["splash"] = new Stage();
 stageList["win"] = new Stage();
+stageList["lose"] = new Stage();
 
 //splash screen logic
 stageList["splash"].update = function () {//actual splash screen update logic here
@@ -61,6 +62,7 @@ for(var i = 0; i < 50; i++) {//kinda lazy
 //stageList["gameOver"].elementsList["ui"].push(new StaticImage(stageList["gameOver"].sceneList["ui"], 0, 0, "assets/GenericLoseScreen.png", new Vector3(16, 9, 1)));
 stageList["splash"].elementsList["ui"].push(new StaticImage(stageList["splash"].sceneList["ui"], 0, 0, "assets/BbtL_Splash_Screen.png", new Vector3(16, 9, 1)));
 stageList["win"].elementsList["ui"].push(new StaticImage(stageList["win"].sceneList["ui"], 0, 0, "assets/win.png", new Vector3(16, 9, 1)));
+stageList["lose"].elementsList["ui"].push(new StaticImage(stageList["lose"].sceneList["ui"], 0, 0, "assets/GenericLoseScreen.png", new Vector3(16, 9, 1)));
 stageList["main"].elementsList["ui"].push(new Mouse(stageList["main"].sceneList["ui"]));
 
 //initial colony placement
@@ -112,7 +114,14 @@ stageList["main"].update = function () {//actual splash screen update logic here
     });
 
     if(currentStage == "main" && localStage.elementsList["game"].findIndex(el => el instanceof Structure ) == -1) {
-        currentStage = "win";//mess with later
+        currentStage = "lose";
+        document.getElementById("TICKS").innerHTML = 
+            "your moss colony managed to drag itself " + ((stragglerX + 4) * 4) + " Moss Units away towards shelter, just "
+             + (1000 - ((stragglerX + 4) * 4)) + " Moss Units short."
+    }
+
+    if(currentStage == "main" && ((stragglerX + 4) * 4) >= 1000) {
+        currentStage = "win";
     }
 
     //var localPlayer: Player = localStage.elementsList["game"].find(el => el instanceof Player);
@@ -179,7 +188,7 @@ stageList["main"].update = function () {//actual splash screen update logic here
         }
     });
 
-    if(localMinX > stragglerX) {
+    if(localMinX != 1000000 && localMinX > stragglerX) {
         stragglerX = localMinX;
     }
     localStage.cameraList["game"].position.setX(stragglerX + 4);
@@ -251,6 +260,7 @@ window.addEventListener("keydown", e => {
 window.addEventListener("click", e => { 
     if(currentStage == "splash") {
         currentStage = "main"
+        document.getElementById("TICKS").innerHTML = "";
     }
 });
 
