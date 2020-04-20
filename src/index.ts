@@ -1,7 +1,6 @@
 /**
  * Add neutral non-moving state
  * Add placement indicator
- * Add sound
  * Balancing
  */
 
@@ -24,8 +23,7 @@ else {
     renderer.setSize(window.innerWidth, window.innerWidth * (9 / 16));
 }
 
-//document.getElementById("canvasContainer").append(renderer.domElement);
-document.body.getElementsByClassName('centered-canvas')[0].appendChild(renderer.domElement);//boardhouse uses a captured canvas element, difference?
+document.body.getElementsByClassName('centered-canvas')[0].appendChild(renderer.domElement);
 
 //globals
 let stageList: { [key: string]: Stage; } = {};//dictionary of all stages
@@ -34,14 +32,13 @@ var win = false;
 var music = new Audio('assets/SFX/MossSong.wav');
 music.loop = true;
 var burnClip = new Audio('assets/SFX/SFX_Fireball.wav');
-//burnClip.volume = 0.8;
 var buzzClip = new Audio('assets/SFX/bee_buzz_edit.wav');
 buzzClip.volume = 0.8;
 var hitClip = new Audio('assets/SFX/bee_man_get_hit2.wav');
 
 
 var ticks:number = 0;
-var selectedUnit:any = null;//can't actually use updateable
+var selectedUnit:any = null;
 var stragglerX:number = -4;
 
 stageList["main"] = new Stage();
@@ -75,7 +72,7 @@ for(var i = 0; i < 9; i++) {
 }
 
 //game screen logic
-stageList["main"].update = function () {//actual splash screen update logic here
+stageList["main"].update = function () {
     var localStage: Stage = stageList["main"];
 
     //enemy spawning
@@ -142,10 +139,10 @@ stageList["main"].update = function () {//actual splash screen update logic here
 
     var localMinX:number = 1000000;
     localStage.elementsList["game"].forEach(el => {
+        //collision logic
         localStage.elementsList["game"].forEach(el2 => {
             if (el !== el2) {
                 if (collision(el, el2)) {
-                    // if player collides with a light beam, take damage   
                     if ((el instanceof Structure || el instanceof Ally) && el.isAlive && el2 instanceof LightBeam && el2.tick > 180) {
                         el.health--;
                         if(el.health < 1) {
@@ -227,7 +224,7 @@ stageList["main"].update = function () {//actual splash screen update logic here
 }
 
 //main update
-var interval = setInterval(update, 1000 / 45);//60 ticks per second
+var interval = setInterval(update, 1000 / 45);//45 ticks per second
 function update() {
     ticks++;
     stageList[currentStage].baseUpdate();
