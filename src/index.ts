@@ -315,7 +315,7 @@ window.addEventListener("mouseup", e => {
         {
             var alreadyPlacement = false;
             stageList["main"].elementsList["game"].forEach(el => {
-                if(!(el instanceof Enemy) && !(el instanceof LightBeam) && collision(el, mouse)){
+                if(el instanceof Structure && collision(el, mouse)){
                     alreadyPlacement = true;
                 }
             });

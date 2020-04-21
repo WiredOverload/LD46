@@ -263,7 +263,7 @@ window.addEventListener("mouseup", function (e) {
         else {
             var alreadyPlacement = false;
             stageList["main"].elementsList["game"].forEach(function (el) {
-                if (!(el instanceof enemy_1.Enemy) && !(el instanceof light_1.LightBeam) && collision(el, mouse)) {
+                if (el instanceof structure_1.Structure && collision(el, mouse)) {
                     alreadyPlacement = true;
                 }
             });
