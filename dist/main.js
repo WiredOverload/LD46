@@ -48374,6 +48374,7 @@ buzzClip.volume = 0.8;
 var hitClip = new Audio('assets/SFX/bee_man_get_hit2.wav');
 var ticks = 0;
 var selectedUnit = null;
+var selectedUnits = [];
 var stragglerX = -4;
 stageList["main"] = new stage_1.Stage();
 stageList["splash"] = new stage_1.Stage();
@@ -48581,13 +48582,17 @@ window.addEventListener("mouseup", function (e) {
     mouse.y += 4.5; //dumb hack to not have to reposition game elements
     mouse.x += stragglerX + 4;
     if (currentStage == "main") {
-        if (selectedUnit == null) {
+        if (selectedUnit == null && e.which == 1) {
             stageList["main"].elementsList["game"].forEach(function (el) {
-                if (e.which == 3 && el instanceof ally_1.Ally && collision(el, mouse)) {
+                if (el instanceof structure_1.Structure && collision(el, mouse)) {
                     selectedUnit = el;
                 }
-                else if (e.which == 1 && el instanceof structure_1.Structure && collision(el, mouse)) {
-                    selectedUnit = el;
+            });
+        }
+        else if (selectedUnits.length == 0 && e.which == 3) {
+            stageList["main"].elementsList["game"].forEach(function (el) {
+                if (el instanceof ally_1.Ally && collision(el, mouse)) {
+                    selectedUnits.push(el);
                 }
             });
         }
@@ -48599,9 +48604,32 @@ window.addEventListener("mouseup", function (e) {
                 }
             });
             if (!alreadyPlacement) {
-                selectedUnit.target = new three_1.Vector2(Math.round(mouse.x * 4) / 4, Math.round(mouse.y * 4) / 4);
-                selectedUnit.velocity = new three_1.Vector2(0, 0);
-                selectedUnit = null;
+                if (selectedUnit != null) {
+                    selectedUnit.target = new three_1.Vector2(Math.round(mouse.x * 4) / 4, Math.round(mouse.y * 4) / 4);
+                    selectedUnit.velocity = new three_1.Vector2(0, 0);
+                    selectedUnit = null;
+                }
+                else {
+                    selectedUnits[0].target = new three_1.Vector2(Math.round(mouse.x * 4) / 4, Math.round(mouse.y * 4) / 4);
+                    selectedUnits[0].velocity = new three_1.Vector2(0, 0);
+                    if (selectedUnits.length > 1) {
+                        selectedUnits[1].target = new three_1.Vector2((Math.round(mouse.x * 4) / 4) + .25, (Math.round(mouse.y * 4) / 4));
+                        selectedUnits[1].velocity = new three_1.Vector2(0, 0);
+                    }
+                    if (selectedUnits.length > 2) {
+                        selectedUnits[2].target = new three_1.Vector2((Math.round(mouse.x * 4) / 4) - .25, (Math.round(mouse.y * 4) / 4));
+                        selectedUnits[2].velocity = new three_1.Vector2(0, 0);
+                    }
+                    if (selectedUnits.length > 3) {
+                        selectedUnits[3].target = new three_1.Vector2((Math.round(mouse.x * 4) / 4), (Math.round(mouse.y * 4) / 4) + .25);
+                        selectedUnits[3].velocity = new three_1.Vector2(0, 0);
+                    }
+                    if (selectedUnits.length > 4) {
+                        selectedUnits[4].target = new three_1.Vector2((Math.round(mouse.x * 4) / 4), (Math.round(mouse.y * 4) / 4) - .25);
+                        selectedUnits[4].velocity = new three_1.Vector2(0, 0);
+                    }
+                    selectedUnits = [];
+                }
             }
         }
     }

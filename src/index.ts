@@ -39,6 +39,7 @@ var hitClip = new Audio('assets/SFX/bee_man_get_hit2.wav');
 
 var ticks:number = 0;
 var selectedUnit:any = null;
+var selectedUnits:any[] = [];
 var stragglerX:number = -4;
 
 stageList["main"] = new Stage();
@@ -292,13 +293,17 @@ window.addEventListener("mouseup", e => {
     mouse.x += stragglerX + 4;
 
     if(currentStage == "main"){
-        if(selectedUnit == null){
+        if(selectedUnit == null && e.which == 1){
             stageList["main"].elementsList["game"].forEach(el => {
-                if(e.which == 3 && el instanceof Ally && collision(el, mouse)){
+                if(el instanceof Structure && collision(el, mouse)){
                     selectedUnit = el;
                 }
-                else if(e.which == 1 && el instanceof Structure && collision(el, mouse)){
-                    selectedUnit = el;
+            });
+        }
+        else if(selectedUnits.length == 0 && e.which == 3) {
+            stageList["main"].elementsList["game"].forEach(el => {
+                if(el instanceof Ally && collision(el, mouse)){
+                    selectedUnits.push(el);
                 }
             });
         }
@@ -312,9 +317,36 @@ window.addEventListener("mouseup", e => {
             });
 
             if(!alreadyPlacement) {
-                selectedUnit.target = new Vector2(Math.round(mouse.x * 4) / 4, Math.round(mouse.y * 4) / 4);
-                selectedUnit.velocity = new Vector2(0, 0);
-                selectedUnit = null;
+                if(selectedUnit != null) {
+                    selectedUnit.target = new Vector2(Math.round(mouse.x * 4) / 4, Math.round(mouse.y * 4) / 4);
+                    selectedUnit.velocity = new Vector2(0, 0);
+                    selectedUnit = null;
+                }
+                else {
+                    selectedUnits[0].target = new Vector2(Math.round(mouse.x * 4) / 4, Math.round(mouse.y * 4) / 4);
+                    selectedUnits[0].velocity = new Vector2(0, 0);
+                    if(selectedUnits.length > 1)
+                    {
+                        selectedUnits[1].target = new Vector2((Math.round(mouse.x * 4) / 4) + .25, (Math.round(mouse.y * 4) / 4));
+                        selectedUnits[1].velocity = new Vector2(0, 0);
+                    }
+                    if(selectedUnits.length > 2)
+                    {
+                        selectedUnits[2].target = new Vector2((Math.round(mouse.x * 4) / 4) - .25, (Math.round(mouse.y * 4) / 4));
+                        selectedUnits[2].velocity = new Vector2(0, 0);
+                    }
+                    if(selectedUnits.length > 3)
+                    {
+                        selectedUnits[3].target = new Vector2((Math.round(mouse.x * 4) / 4), (Math.round(mouse.y * 4) / 4) + .25);
+                        selectedUnits[3].velocity = new Vector2(0, 0);
+                    }
+                    if(selectedUnits.length > 4)
+                    {
+                        selectedUnits[4].target = new Vector2((Math.round(mouse.x * 4) / 4), (Math.round(mouse.y * 4) / 4) - .25);
+                        selectedUnits[4].velocity = new Vector2(0, 0);
+                    }
+                    selectedUnits = [];
+                }
             }
         }
     }
