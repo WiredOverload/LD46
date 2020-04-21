@@ -57,14 +57,15 @@ stageList["win"].update = function () {
 }
 
 //backgrounds
-for(var i = 0; i < 50; i++) {//kinda lazy
+for(var i = 0; i < 10; i++) {//kinda lazy
     stageList["main"].elementsList["background"].push(new StaticImage(stageList["main"].sceneList["background"], i * 16, 0, "assets/forestFloor.png", new Vector3(16, 9, 1)));
 }
+stageList["main"].elementsList["background"].push(new StaticImage(stageList["main"].sceneList["background"], 62, 0, "assets/log.png", new Vector3(4.5, 9, 1)));
 
 
 stageList["splash"].elementsList["ui"].push(new StaticImage(stageList["splash"].sceneList["ui"], 0, 0, "assets/BbtL_Splash_Screen.png", new Vector3(16, 9, 1)));
-stageList["win"].elementsList["ui"].push(new StaticImage(stageList["win"].sceneList["ui"], 0, 0, "assets/win.png", new Vector3(16, 9, 1)));
-stageList["lose"].elementsList["ui"].push(new StaticImage(stageList["lose"].sceneList["ui"], 0, 0, "assets/GenericLoseScreen.png", new Vector3(16, 9, 1)));
+stageList["win"].elementsList["ui"].push(new StaticImage(stageList["win"].sceneList["ui"], 0, 0, "assets/YouWin.png", new Vector3(16, 9, 1)));
+stageList["lose"].elementsList["ui"].push(new StaticImage(stageList["lose"].sceneList["ui"], 0, 0, "assets/YouLose.png", new Vector3(16, 9, 1)));
 stageList["main"].elementsList["ui"].push(new Mouse(stageList["main"].sceneList["ui"]));
 
 //initial colony placement
@@ -118,11 +119,11 @@ stageList["main"].update = function () {
     if(currentStage == "main" && localStage.elementsList["game"].findIndex(el => el instanceof Structure ) == -1) {
         currentStage = "lose";
         document.getElementById("TICKS").innerHTML = 
-            "your moss colony managed to drag itself " + ((stragglerX + 4) * 4) + " Moss Units towards shelter, just "
-             + (1000 - ((stragglerX + 4) * 4)) + " Moss Units short."
+            "your moss colony managed to drag itself " + ((stragglerX - 8) * 4) + " Moss Units towards shelter, just "
+             + (250 - ((stragglerX - 8) * 4)) + " Moss Units short."
     }
 
-    if(currentStage == "main" && ((stragglerX + 4) * 4) >= 1000) {
+    if(currentStage == "main" && ((stragglerX) * 4) >= 250) {
         currentStage = "win";
     }
 
